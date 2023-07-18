@@ -270,7 +270,7 @@ const registerUser = async (name, email, password, imageUri) => {
                 style={registerStyles.image}
               />
             )}
-            <TouchableOpacity
+            <TouchableOpacity 
               style={registerStyles.addButton}
               onPress={handleChooseImage}
             >

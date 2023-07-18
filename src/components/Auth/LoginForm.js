@@ -25,6 +25,8 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import useAuth from "../../hooks/useAuth";
 import { db } from "../../utils/firebaseConfig";
 import { collection, query, where, getDocs, onSnapshot, orderBy, getDoc } from 'firebase/firestore';
+import { colors } from "../../styles/colors";
+import { color } from "react-native-reanimated";
 
 /**
 Componente de formulario de inicio de sesión
@@ -164,16 +166,23 @@ Función para establecer el esquema de validación del formulario.
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={require("../../assets/images/backgroundLogin.png")}
-        style={styles.image}
+        source={require("../../assets/images/backlogin.png")}
+        style={styles.imageback}
       >
         <View style={styles.overlay}>
-          <Text style={styles.titleH}>Sabor Universitario</Text>
+        <View style={styles.imageContainer}>
+        <Text style={styles.titleH}>DustBusters</Text>
+              <Image
+                source={require("../../assets/images/logoapp.png")}
+                style={styles.image}
+              />
+        
+  
+          </View>
         </View>
       </ImageBackground>
 
       <View style={styles.containerForm}>
-        <Text style={styles.title}>Bienvenido de nuevo</Text>
         <Text style={styles.text}>Email</Text>
         <Input
           placeholderText="Ingresa tu correo"
@@ -231,33 +240,30 @@ const styles = StyleSheet.create({
   containerForm: {
     backgroundColor: "#FFF",
     position: "absolute",
+    paddingVertical : 20,
     borderTopRightRadius: 40,
     borderTopLeftRadius: 40,
     bottom: 0,
     left: 0,
     right: 0,
-    height: 500,
+    height: 400,
   },
   title: {
     marginVertical: 20,
-    color: "#557BF1",
+    color: colors.black,
     fontWeight: "bold",
     textAlign: "center",
     fontSize: 20,
   },
   text: {
     paddingHorizontal: 20,
-    color: "#557BF1",
+    color: colors.black,
     fontWeight: "bold",
     fontSize: 16,
   },
   imageContainer: {
     position: "relative",
     flex: 1,
-  },
-  image: {
-    flex: 1,
-    resizeMode: "cover",
   },
   textContainer: {
     position: "absolute",
@@ -279,7 +285,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.1)",
   },
-
+  imageback: {
+    flex: 1,
+    resizeMode: "cover",
+  },
   signupContainer: {
     alignItems: "center",
     justifyContent: "center",
@@ -289,13 +298,30 @@ const styles = StyleSheet.create({
   },
   signupLink: {
     fontWeight: "bold",
-    color: "#557BF1",
+    color: colors.primary,
   },
   olvide: {
     fontWeight: "bold",
-    color: "#557BF1",
+    color:  colors.primary,
     textAlign: "right",
     paddingHorizontal: 20,
     marginVertical:10,
+  },
+  imageContainer: {
+    alignItems: 'center',
+    marginVertical: 10,
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  image: {
+    width: 188,
+    height: 210,
+  },
+  titleH: {
+    color: "#fff",
+    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 34,
+    marginTop: 70,
   },
 });
