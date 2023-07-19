@@ -5,6 +5,7 @@ import Account from '../screen/Account';
 import LoginForm from '../components/Auth/LoginForm';
 import Navigation from './Navigation';
 import CrearCuenta from '../screen/RegisterScreen';
+import TipoUsuario from '../screen/TipoUsuario';
 
 
 
@@ -16,6 +17,7 @@ export default function NavigationAccount() {
         <Stack.Screen name='Login' component={LoginForm} options={{headerShown: false}}/>
         <Stack.Screen name='CreateCuenta' component={CrearCuenta} options={{headerShown: false}}/>
         <Stack.Screen name='Tabs' component={Navigation} options={{headerShown: false}}/>
+        <Stack.Screen name='Tipo' component={TipoUsuario} options={{headerShown: false}}/>
     </Stack.Navigator>
   )
 }

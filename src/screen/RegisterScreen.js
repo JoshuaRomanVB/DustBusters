@@ -26,6 +26,7 @@ import { collection, query, onSnapshot, orderBy, addDoc } from "firebase/firesto
 
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import CustomButton from "../components/CustomButton";
 
 
 const RegisterScreen = ({ navigation }) => {
@@ -110,6 +111,10 @@ const RegisterScreen = ({ navigation }) => {
 
   function irALogin() {
     navigation.navigate("Login");
+  }
+
+  function irTipo() {
+    navigation.navigate("Tipo");
   }
 
   const handleChooseImage = async () => {
@@ -256,27 +261,13 @@ const registerUser = async (name, email, password, imageUri) => {
   return (
     <SafeAreaView style={globalstyles.container}>
       <ImageBackground
-        source={require("../assets/images/backgroundLogin.png")}
+        source={require("../assets/images/baclregistro.png")}
         style={registerStyles.imageback}
       >
         <View style={registerStyles.overlay}>
-          <Text style={registerStyles.titleH}>CREACIÓN DE CUENTA</Text>
-          <View style={registerStyles.imageContainer}>
-            {imageUri ? (
-              <Image source={{ uri: imageUri }} style={registerStyles.image} />
-            ) : (
-              <Image
-                source={require("../assets/images/perfil.png")}
-                style={registerStyles.image}
-              />
-            )}
-            <TouchableOpacity 
-              style={registerStyles.addButton}
-              onPress={handleChooseImage}
-            >
-              <Text style={registerStyles.addButtonText}>+</Text>
-            </TouchableOpacity>
-          </View>
+          <Text style={registerStyles.titleH}>TU INFORMACIÓN</Text>
+          <Text style={registerStyles.subtitle}>Para terminar tu registro rellena el formulario</Text>
+
         </View>
       </ImageBackground>
 
@@ -307,9 +298,7 @@ const registerUser = async (name, email, password, imageUri) => {
       />
 
       <View style={registerStyles.containerForm}>
-        <Text style={registerStyles.title}>
-          EMPIEZA A DISFRUTAR DEL SABOR UNIVERSITARIO
-        </Text>
+    
         <Text style={[typography.body, registerStyles.inputText]}>Nombre</Text>
         <Input
           placeholderText="Nombre "
@@ -323,8 +312,8 @@ const registerUser = async (name, email, password, imageUri) => {
           Correo electronico
         </Text>
         <Input
-          placeholderText="Email"
-          iconName="mail"
+          placeholderText="+52 344 543 2345"
+          iconName="call"
           onChangeText={setEmail}
         />
         {emailError !== "" && (
@@ -342,8 +331,8 @@ const registerUser = async (name, email, password, imageUri) => {
         {passwordError !== "" && (
           <Text style={registerStyles.errorText}>{passwordError}</Text>
         )}
-        <ButtonPrymary onPress={handleUploadImage} text="Registrarme" />
-        <ButtonText onPress={irALogin} text="Ya tienes cuenta?  Inicia sesión aqui" />
+         <CustomButton title="Registrarse" onPress={irTipo} />
+        <ButtonText onPress={irALogin} text="¿Ya tienes cuenta?  Inicia sesión aqui" />
       </View>
     </SafeAreaView>
   );

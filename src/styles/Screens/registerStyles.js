@@ -64,10 +64,11 @@ export const registerStyles = StyleSheet.create({
       position: "absolute",
       borderTopRightRadius: 40,
       borderTopLeftRadius: 40,
+      paddingTop: 20,
       bottom: 0,
       left: 0,
       right: 0,
-      height: 500,
+      height: 400,
     },
     overlay: {
       flex: 1,
@@ -79,6 +80,13 @@ export const registerStyles = StyleSheet.create({
       textAlign: "center",
       fontSize: 34,
       marginTop: 70,
+    },
+    subtitle: {
+      color: "#fff",
+      fontWeight: "bold",
+      textAlign: "center",
+      fontSize: 24,
+      marginTop: 30,
     },
     imageback: {
       flex: 1,
