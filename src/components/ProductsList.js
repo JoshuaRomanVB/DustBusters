@@ -3,9 +3,10 @@ import React from 'react'
 import StoreCard from './StoreCard';
 import FloatButton from './FloatButton';
 import { useNavigation } from '@react-navigation/native';
+import ProductCard from './ProductCard';
 
-export default function HomeStoresList({stores}) {
-    console.log(stores);
+export default function ProductsList({products, idStore, nameStore}) {
+    console.log(products);
 
     const navigation = useNavigation();
 
@@ -15,23 +16,23 @@ export default function HomeStoresList({stores}) {
      * @author Alessandro Guevara
      */
     const handleNavigate = () => {
-        navigation.navigate('FormStore', {
-            dataStore: undefined
+        navigation.navigate('FormProduct', {
+            dataProduct: undefined,
+            id_store: idStore,
+            name_store: nameStore,
         });
     }
 
     return (
         <View style={styles.container}>
             <FlatList
-                data={stores}
+                data={products}
                 numColumns={1}
-                renderItem={({ item }) => <StoreCard dataStore={item} />}
-                keyExtractor={(stores) => String(stores.id_store)}
+                renderItem={({ item }) => <ProductCard dataProduct={item}/>}
+                keyExtractor={(products) => String(products.id_product)}
                 onEndReachedThreshold={0.5}
             />
-            {stores.length < 1 && (
-                <FloatButton handleNavigateTo={handleNavigate} screenCalled={'home'}/>
-            )}
+            <FloatButton handleNavigateTo={handleNavigate} screenCalled={'products'}/>
         </View>
     )
 }

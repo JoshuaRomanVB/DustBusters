@@ -19,7 +19,14 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { userDetails, user } from "../../utils/userDB";
 import CustomButton from "../CustomButton";
-
+import {auth} from "../../utils/firebaseConfig"
+import Input from "../Input";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import useAuth from "../../hooks/useAuth";
+import { db } from "../../utils/firebaseConfig";
+import { collection, query, where, getDocs, onSnapshot, orderBy, getDoc } from 'firebase/firestore';
+import { colors } from "../../styles/colors";
+import { color } from "react-native-reanimated";
 
 /**
 Componente de formulario de inicio de sesión
@@ -33,28 +40,91 @@ También maneja la validación del formulario y la autenticación del usuario.
 export default function LoginForm(props) {
   const { navigation } = props;
   const [error, setError] = useState("");
+  const { login } = useAuth();
 
- 
+  /**
+   * Función para obtener datos de usuario de la base de datos
+   * @date 7/14/2023 - 12:56:21 AM
+   * @author Alessandro Guevara
+   *
+   * @param {String} idUser - id de usuario
+   * @returns {Promise Object} - objeto con estatus y datos de usuario
+   */
+  const getUserData = async (idUser) => {
+    return new Promise(async (resolve) => {
+      // Creamos referencia a la base de datos y a la colección
+      try {
+        const refCollection = collection(db, 'Usuarios');
+        const searchQuery = query(refCollection, where('uid', '==', idUser));
+        const queryFetch = await getDocs(searchQuery);
 
+        let userData;
+        queryFetch.docs.map((user) => {
+          userData = user.data();
+        });
+
+        let objResp = {
+          status: true,
+          user_data: userData,
+        }
+        resolve(objResp);
+
+      } catch (error) {
+        console.log("ERROR GET DATA USER");
+        console.log(error);
+        let objResp = {
+          status: false,
+        }
+        resolve(objResp);
+      }
+
+    })
+    
+    
+
+  }
+    
   const formik = useFormik({
     initialValues: initialValues(),
     validationSchema: Yup.object(validationSchema()),
     validateOnChange: false,
     onSubmit: async (formData) => {
       setError("");
-      const { username, password } = formData;
+      const { email, password } = formData;
 
       try {
-        signInWithEmailAndPassword(auth, username, password)
+        signInWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
             // Acceso exitoso
-            navigation.navigate("Tabs");
             const user = userCredential.user;
+            const id_user = user.uid;
+            const email_user = user.email;
             console.log(user);
+
+            getUserData(id_user).then((result) => {
+              if(result.status) {
+                const user_data = result.user_data;
+                const objUser = {
+                  id_user: id_user,
+                  email_user: email_user,
+                  name_user: user_data.name,
+                  avatar_user: user_data.imageUri
+                }
+                login(objUser);
+                
+                navigation.navigate("Tabs");
+              }else {
+                setError("Usuario no encontrado");
+
+              }
+            })
+            
+            
           })
           .catch((error) => {
             // Error de autenticación
             console.log(error);
+            setError("Usuario o contraseña incorrecta");
           });
 
         // Aquí puedes redirigir al usuario a la pantalla de inicio o hacer cualquier otra acción necesaria después del inicio de sesión exitoso.
@@ -72,7 +142,7 @@ Función para establecer los valores iniciales del formulario.
 
   function initialValues() {
     return {
-      username: "",
+      email: "",
       password: "",
     };
   }
@@ -84,53 +154,58 @@ Función para establecer el esquema de validación del formulario.
 */
   function validationSchema() {
     return {
-      username: Yup.string().required("El nombre de usuario es obligatorio"),
-      password: Yup.string().required("La contraseña es obligatoria"),
+      password: Yup.string().required("La contraseña es obligatorio"),
+      email: Yup.string().required("El correo electrónico es obligatorio").email("El correo electrónico no es válido"),
     };
   }
 
-  function irACrearCuenta(){
-    navigation.navigate('CreateCuenta');
+  function irACrearCuenta() {
+    navigation.navigate("CreateCuenta");
   }
 
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={require("../../assets/images/backgroundLogin.png")}
-        style={styles.image}
+        source={require("../../assets/images/backlogin.png")}
+        style={styles.imageback}
       >
         <View style={styles.overlay}>
-          <Text style={styles.titleH}>Sabor Universitario</Text>
+        <View style={styles.imageContainer}>
+        <Text style={styles.titleH}>DustBusters</Text>
+              <Image
+                source={require("../../assets/images/logoapp.png")}
+                style={styles.image}
+              />
+        
+  
+          </View>
         </View>
       </ImageBackground>
 
       <View style={styles.containerForm}>
-        {/* Resto del contenido del formulario */}
-      </View>
-
-      <View style={styles.containerForm}>
-        <Text style={styles.title}>Bienvenido de nuevo</Text>
         <Text style={styles.text}>Email</Text>
-        <TextInput
-          placeholder={"Ingrese su correo electronico"} // Corrección: placeholder en lugar de placehorder
-          placeholderTextColor="#C9C9C9"
-          style={styles.input}
+        <Input
+          placeholderText="Ingresa tu correo"
+          value={formik.values.email}
+          iconName="happy"
           autoCapitalize="none"
-          value={formik.values.username}
-          onChangeText={(text) => formik.setFieldValue("username", text)}
+          onChangeText={(text) => formik.setFieldValue("email", text)}
         />
-        <Text style={styles.error}>{formik.errors.username}</Text>
+        {formik.errors.email !== "" && (
+          <Text style={styles.error}>{formik.errors.email}</Text>
+        )}
         <Text style={styles.text}>Contraseña</Text>
-        <TextInput
-          placeholder={"Ingrese su contraseña"} // Corrección: placeholder en lugar de placehorder
-          placeholderTextColor="#C9C9C9"
-          style={styles.input}
-          autoCapitalize="none"
+        <Input
+          placeholderText="Ingrese su contraseña"
           value={formik.values.password}
           secureTextEntry={true}
+          autoCapitalize="none"
+          iconName="lock-closed"
           onChangeText={(text) => formik.setFieldValue("password", text)}
         />
-        <Text style={styles.error}>{formik.errors.password}</Text>
+        {formik.errors.password !== "" && (
+          <Text style={styles.error}>{formik.errors.password}</Text>
+        )}
         <TouchableOpacity>
           <Text style={styles.olvide}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
@@ -150,28 +225,9 @@ Función para establecer el esquema de validación del formulario.
 }
 
 const styles = StyleSheet.create({
-  input: {
-    height: 50,
-    width: "100%",
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: "#FFF",
-    color: "#000",
-    // Estilos para Android
-    elevation: 2,
-    // Estilos para iOS
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
   error: {
     color: "#F70303",
     textAlign: "center",
-    marginVertical: 10,
   },
   background: {
     height: "50%",
@@ -184,33 +240,30 @@ const styles = StyleSheet.create({
   containerForm: {
     backgroundColor: "#FFF",
     position: "absolute",
-    paddingHorizontal: 30,
+    paddingVertical : 20,
     borderTopRightRadius: 40,
     borderTopLeftRadius: 40,
     bottom: 0,
     left: 0,
     right: 0,
-    height: 500,
+    height: 400,
   },
   title: {
     marginVertical: 20,
-    color: "#557BF1",
+    color: colors.black,
     fontWeight: "bold",
     textAlign: "center",
-    fontSize: 30,
+    fontSize: 20,
   },
   text: {
-    color: "#557BF1",
+    paddingHorizontal: 20,
+    color: colors.black,
     fontWeight: "bold",
     fontSize: 16,
   },
   imageContainer: {
     position: "relative",
     flex: 1,
-  },
-  image: {
-    flex: 1,
-    resizeMode: "cover",
   },
   textContainer: {
     position: "absolute",
@@ -232,7 +285,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.1)",
   },
-
+  imageback: {
+    flex: 1,
+    resizeMode: "cover",
+  },
   signupContainer: {
     alignItems: "center",
     justifyContent: "center",
@@ -242,12 +298,30 @@ const styles = StyleSheet.create({
   },
   signupLink: {
     fontWeight: "bold",
-    color: "#557BF1",
+    color: colors.primary,
   },
   olvide: {
-    marginVertical: 10,
     fontWeight: "bold",
-    color: "#557BF1",
-    textAlign: 'right'
+    color:  colors.primary,
+    textAlign: "right",
+    paddingHorizontal: 20,
+    marginVertical:10,
+  },
+  imageContainer: {
+    alignItems: 'center',
+    marginVertical: 10,
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  image: {
+    width: 188,
+    height: 210,
+  },
+  titleH: {
+    color: "#fff",
+    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 34,
+    marginTop: 70,
   },
 });
