@@ -9,7 +9,7 @@ import {
 import React from 'react';
 import { Entypo } from '@expo/vector-icons';
 
-export default function Screen2() {
+export default function Chat() {
 	return (
 		<ScrollView style={{ flex: 1, backgroundColor: '#fff' }}>
 			<View style={styles.contenedor}>
