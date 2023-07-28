@@ -1,14 +1,14 @@
 import { View, Text } from "react-native";
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-import Account from "../screen/Account";
 import LoginForm from "../components/Auth/LoginForm";
 import Navigation from "./Navigation";
 import RegisterScreen from "../screen/RegisterScreen";
 import CrearCuenta from "../screen/CrearCuentaC";
 import CrearCuentaD from "../screen/CrearCuentaD";
 import DocumentosD from "../screen/DocumentosD";
-import TipoUsuario from "../screen/TipoUsuario";
+
+import CrearCuentaTipo from "../screen/CrearCuentaTipo";
 
 export default function NavigationAccount() {
   const Stack = createStackNavigator();
@@ -45,8 +45,8 @@ export default function NavigationAccount() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="Tipo"
-        component={TipoUsuario}
+        name="CrearCuentaTipo"
+        component={CrearCuentaTipo}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
