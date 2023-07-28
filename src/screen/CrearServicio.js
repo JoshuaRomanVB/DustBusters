@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
 	View,
 	Text,
@@ -9,11 +9,60 @@ import {
 	TextInput,
 	ScrollView,
 	Image,
+	Keyboard,
 } from 'react-native';
-
+``;
 const windowHeight = Dimensions.get('window').height;
 
 const CrearServcio = () => {
+	const [error, setError] = useState(false);
+	const [telefono, setTelefono] = useState('');
+	const [telefonoValido, setTelefonoValido] = useState(true);
+
+	const [nombreServicio, setNombreServicio] = useState('');
+	const [detalles, setDetalles] = useState('');
+	const [personasRequeridas, setPersonasRequeridas] = useState('');
+	// const [nombreServicioValido, setNombreServicioValido] = useState(true);
+	// const [detallesValidos, setDetallesValidos] = useState(true);
+	// const [personasRequeridasValidas, setPersonasRequeridasValidas] =
+	useState(true);
+	const validarTel = () => {
+		// Expresión regular para validar el telefono
+		const regexCodigo = /^\d{9}$/;
+		setTelefonoValido(regexCodigo.test(telefono));
+	};
+
+	const handleEnviar = () => {
+		// Verificar si todos los campos tienen contenido
+		const todosLosCamposLlenos =
+			nombreServicio.trim() !== '' &&
+			detalles.trim() !== '' &&
+			personasRequeridas.trim() !== '' &&
+			telefono.trim() !== '';
+
+		if (
+			todosLosCamposLlenos &&
+			//nombreServicioValido &&
+			//detallesValidos &&
+			//personasRequeridasValidas //&&
+			telefonoValido
+		) {
+			setError(false);
+			// Realizar la acción de envío aquí, ya que todos los campos están llenos y son válidos
+			console.log('Formulario válido. Enviar la información:', {
+				nombreServicio,
+				detalles,
+				personasRequeridas,
+				telefono,
+			});
+		} else {
+			setError(true);
+			console.log(
+				'Debes completar todos los campos antes de enviar el formulario o hay campos inválidos.'
+			);
+		}
+	};
+
 	return (
 		<ImageBackground
 			source={require('../../src/assets/images/crearServicio.png')}
@@ -41,31 +90,46 @@ const CrearServcio = () => {
 					<ScrollView contentContainerStyle={styles.scroll}>
 						<Text style={styles.textCodigo}>Nombre del servicio</Text>
 						<TextInput
-							placeholder='misterio367@gmail.com'
-							style={styles.inputText}
+							placeholder='Nombre del servicio'
+							style={[styles.inputText]}
 							autoCapitalize='none'
-							secureTextEntry={true}
+							onChangeText={(text) => {
+								setNombreServicio(text);
+							}}
 						/>
 						<Text style={styles.textCodigo}>Teléfono</Text>
 						<TextInput
 							placeholder='4426690750'
-							style={styles.inputText}
+							style={[styles.inputText]}
 							autoCapitalize='none'
-							secureTextEntry={true}
+							keyboardType='numeric'
+							onChangeText={(text) => {
+								setTelefono(text);
+								validarTel(text);
+							}}
+							onSubmitEditing={() => {
+								// Aquí puedes agregar alguna lógica adicional si es necesario
+								Keyboard.dismiss(); // Esto cerrará el teclado automáticamente
+							}}
 						/>
 						<Text style={styles.textCodigo}>Detalles</Text>
 						<TextInput
 							placeholder='Detalles'
-							style={styles.inputText}
+							style={[styles.inputTextDetalle]}
 							autoCapitalize='none'
-							secureTextEntry={true}
+							onChangeText={(text) => {
+								setDetalles(text);
+							}}
 						/>
 						<Text style={styles.textCodigo}>Personas requeridas</Text>
 						<TextInput
-							placeholder='1'
-							style={styles.inputText}
+							placeholder='Personas requeridas'
+							style={[styles.inputText]}
 							autoCapitalize='none'
-							secureTextEntry={true}
+							keyboardType='numeric'
+							onChangeText={(text) => {
+								setPersonasRequeridas(text);
+							}}
 						/>
 						<Text style={styles.textCodigo}>Ubicación</Text>
 						<Image
@@ -77,8 +141,14 @@ const CrearServcio = () => {
 							source={require('../../src/assets/images/casa.png')}
 							style={styles.image}
 						/>
+						{error && (
+							<Text style={styles.errorText}>Revisa los campos</Text>
+						)}
 
-						<TouchableOpacity style={styles.button}>
+						<TouchableOpacity
+							style={styles.button}
+							onPress={handleEnviar}
+						>
 							<Text style={styles.buttonText}>Enviar</Text>
 						</TouchableOpacity>
 					</ScrollView>
@@ -172,6 +242,24 @@ const styles = StyleSheet.create({
 		borderColor: '#000', // Cambia el color del borde aquí
 		borderWidth: 2, // Asegúrate de especificar el ancho del borde
 		width: 350,
+	},
+	inputTextDetalle: {
+		height: 50,
+		backgroundColor: '#F8F8F8',
+		borderRadius: 20,
+		marginTop: 5,
+		marginBottom: 5,
+		paddingStart: 20,
+		borderColor: '#000', // Cambia el color del borde aquí
+		borderWidth: 2, // Asegúrate de especificar el ancho del borde
+		width: 350,
+		//height: 200,
+	},
+	errorText: {
+		color: 'red',
+		fontSize: 16,
+		marginTop: 5,
+		textAlign: 'center',
 	},
 });
 

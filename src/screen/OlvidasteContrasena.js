@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
 	View,
 	Text,
@@ -12,6 +12,24 @@ import {
 const windowHeight = Dimensions.get('window').height;
 
 const OlvidasteContrasena = () => {
+	const [correo, setCorreo] = useState('');
+	const [correoValido, setCorreoValido] = useState(true);
+
+	const validarCorreo = () => {
+		// Expresión regular para validar el correo electrónico
+		const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		setCorreoValido(regexCorreo.test(correo));
+	};
+
+	const handleEnviar = () => {
+		// Si el correo es válido, realizar la acción de envío aquí
+		if (correoValido) {
+			// Tu lógica para enviar el correo de recuperación de contraseña
+			console.log('Correo válido, enviar correo:', correo);
+		} else {
+			console.log('Correo no válido, revisa el formato.');
+		}
+	};
 	return (
 		<ImageBackground
 			source={require('../../src/assets/images/contra.png')}
@@ -41,11 +59,22 @@ const OlvidasteContrasena = () => {
 					<Text style={styles.textCodigo}>Correo</Text>
 					<TextInput
 						placeholder='misterio367@gmail.com'
-						style={styles.inputText}
+						style={[
+							styles.inputText,
+							!correoValido ? { borderColor: 'red' } : null,
+						]}
 						autoCapitalize='none'
-						secureTextEntry={true}
+						onChangeText={(text) => {
+							setCorreo(text);
+							validarCorreo(text);
+						}}
 					/>
-					<TouchableOpacity style={styles.button}>
+					{!correoValido && (
+						<Text style={styles.errorText}>
+							¡Correo inválido! Revisa el formato.
+						</Text>
+					)}
+					<TouchableOpacity style={styles.button} onPress={handleEnviar}>
 						<Text style={styles.buttonText}>Enviar</Text>
 					</TouchableOpacity>
 				</View>
@@ -131,6 +160,12 @@ const styles = StyleSheet.create({
 		borderColor: '#000', // Cambia el color del borde aquí
 		borderWidth: 2, // Asegúrate de especificar el ancho del borde
 		width: 200,
+	},
+	errorText: {
+		color: 'red',
+		fontSize: 16,
+		marginTop: 5,
+		textAlign: 'center',
 	},
 });
 
