@@ -17,7 +17,6 @@ import {
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { userDetails, user } from "../../utils/userDB";
 import CustomButton from "../CustomButton";
 import {auth} from "../../utils/firebaseConfig"
 import Input from "../Input";

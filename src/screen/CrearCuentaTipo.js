@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, ImageBackground, TouchableOpacity, StyleSheet, Image } from 'react-native';
 
-export default function TipoUsuario() {
+export default function CrearCuentaTipo() {
   return (
     <View>
       <ImageBackground
