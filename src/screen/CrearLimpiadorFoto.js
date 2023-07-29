@@ -9,12 +9,13 @@ import {
 } from "react-native";
 import React from "react";
 import ButtonLogin from "../components/ButtonCrear";
-import BotonIne from "../components/BotonIne";
-import BotonCarta from "../components/BotonCarta";
-import BotonComprobante from "../components/BotonComprobante";
-import BotonCurp from "../components/BotonCurp";
 
-export default function Documentos(props) {
+export default function CrearLimpiadorFoto({navigation}) {
+
+  function irACrearDocumentacionLimpiador() {
+    navigation.navigate("Olvide");
+  }
+
   return (
     <View style={styles.mainContainer}>
       <ImageBackground
@@ -23,40 +24,26 @@ export default function Documentos(props) {
       >
         <View style={styles.overlay}>
           <View style={styles.imageContainer}>
-            <Text style={styles.titleH}>DOCUMENTACÍON</Text>
+            <Text style={styles.titleH}>¡Bienvenido DustBuster!</Text>
             <Text style={styles.subTitulo}>
-              Para poderte registrar como DustBuster sube tu carta de
-              antescedentes no penales
+              Esperamos que tu experiencia sea de lo mejor
+            </Text>
+            <Image
+              source={require("../assets/images/dustbuster-logo.png")}
+              style={styles.image}
+            />
+            <Image
+              source={require("../assets/images/plus.png")}
+              style={styles.image2}
+            />
+            <Text style={styles.subTitulo}>
+              Agrega una foto para que los clientes confien en ti
             </Text>
           </View>
         </View>
-        <View style={styles.botonI}>
-          <BotonIne
-            onPress={() => props.navigation.navigate("Documentos")}
-            title="Ine"
-          />
-        </View>
-        <View style={styles.botonC}>
-          <BotonCarta
-            onPress={() => props.navigation.navigate("Documentos")}
-            title="Carta de antecedentes no penales"
-          />
-        </View>
-        <View style={styles.botonC2}>
-          <BotonCurp
-            onPress={() => props.navigation.navigate("Documentos")}
-            title="Curp"
-          />
-        </View>
-        <View style={styles.botonC3}>
-          <BotonComprobante
-            onPress={() => props.navigation.navigate("Documentos")}
-            title="Comprobante de domicilio"
-          />
-        </View>
         <View style={styles.containerForm}>
           <ButtonLogin
-            onPress={() => props.navigation.navigate("Documentos")}
+            onPress={irACrearDocumentacionLimpiador}
             title="Continuar"
           />
         </View>
@@ -70,25 +57,13 @@ const styles = StyleSheet.create({
     height: "100%",
     width: "100%",
   },
-  botonI: {
+  containerSvg: {
     alignItems: "center",
-    justifyContent: "center",
-    top: -50,
+    justifyContent: "flex-start",
+    width: "100%",
   },
-  botonC: {
-    alignItems: "center",
-    justifyContent: "center",
-    top: -49,
-  },
-  botonC2: {
-    alignItems: "center",
-    justifyContent: "center",
-    top: -49,
-  },
-  botonC3: {
-    alignItems: "center",
-    justifyContent: "center",
-    top: -49,
+  fondoLogin: {
+    top: 150,
   },
   containerForm: {
     alignItems: "center",

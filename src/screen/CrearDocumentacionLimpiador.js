@@ -9,8 +9,9 @@ import {
 } from "react-native";
 import React from "react";
 import ButtonLogin from "../components/ButtonCrear";
+import BotonDocumentos from "../components/BotonDocumentos";
 
-export default function CrearCuentaD(props) {
+export default function CrearDocumentacionLimpiador(props) {
   return (
     <View style={styles.mainContainer}>
       <ImageBackground
@@ -19,26 +20,28 @@ export default function CrearCuentaD(props) {
       >
         <View style={styles.overlay}>
           <View style={styles.imageContainer}>
-            <Text style={styles.titleH}>¡Bienvenido DustBuster!</Text>
+            <Text style={styles.titleH}>DOCUMENTACÍON</Text>
             <Text style={styles.subTitulo}>
-              Esperamos que tu experiencia sea de lo mejor
-            </Text>
-            <Image
-              source={require("../assets/images/dustbuster-logo.png")}
-              style={styles.image}
-            />
-            <Image
-              source={require("../assets/images/plus.png")}
-              style={styles.image2}
-            />
-            <Text style={styles.subTitulo}>
-              Agrega una foto para que los clientes confien en ti
+              Para poderte registrar como DustBuster sube tu carta de
+              antescedentes no penales
             </Text>
           </View>
         </View>
+        <View style={styles.botonI}>
+          <BotonDocumentos title="INE" />
+        </View>
+        <View style={styles.botonC}>
+          <BotonDocumentos title="CARTA ANTECEDENTES NO PENALES" />
+        </View>
+        <View style={styles.botonC2}>
+          <BotonDocumentos title="COMPROBANTE DE DOMICILIO" />
+        </View>
+        <View style={styles.botonC3}>
+          <BotonDocumentos title="CURP" />
+        </View>
         <View style={styles.containerForm}>
           <ButtonLogin
-            onPress={() => props.navigation.navigate("Documentos")}
+            onPress={() => props.navigation.navigate("CrearCuentaForm")}
             title="Continuar"
           />
         </View>
@@ -52,13 +55,25 @@ const styles = StyleSheet.create({
     height: "100%",
     width: "100%",
   },
-  containerSvg: {
+  botonI: {
     alignItems: "center",
-    justifyContent: "flex-start",
-    width: "100%",
+    justifyContent: "center",
+    top: -50,
   },
-  fondoLogin: {
-    top: 150,
+  botonC: {
+    alignItems: "center",
+    justifyContent: "center",
+    top: -49,
+  },
+  botonC2: {
+    alignItems: "center",
+    justifyContent: "center",
+    top: -49,
+  },
+  botonC3: {
+    alignItems: "center",
+    justifyContent: "center",
+    top: -49,
   },
   containerForm: {
     alignItems: "center",

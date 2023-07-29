@@ -10,6 +10,7 @@ import {
 	ScrollView,
 	Image,
 } from 'react-native';
+import CustomHeader from '../components/CustomHeader';
 
 const windowHeight = Dimensions.get('window').height;
 
@@ -22,7 +23,7 @@ const CrearServcio = () => {
 		>
 			{/* Cortina de color con opacidad */}
 			<View style={styles.overlay} />
-
+			<CustomHeader/>
 			<View style={styles.containerT}>
 				{/* Contenedor para el texto title */}
 				<View style={styles.titleContainer}>

@@ -10,11 +10,19 @@ import {
 import React from 'react';
 import MapView from 'react-native-maps';
 import { Entypo } from '@expo/vector-icons';
+import CustomHeader from '../components/CustomHeader';
 
-export default function DetalleServicio() {
+export default function DetalleServicio({navigation}) {
+
+	
+	function irAChat() {
+		navigation.navigate("Chat");
+	  }
+
 	return (
 		<ScrollView style={{ flex: 1, backgroundColor: '#fff' }}>
-			<View style={styles.card}>
+			<CustomHeader/>
+			<View style={styles.card}>				
 				<Image
 					source={{
 						uri: 'https://ca-times.brightspotcdn.com/dims4/default/570fbde/2147483647/strip/true/crop/4938x2936+0+0/resize/1200x713!/quality/80/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2F90%2F03%2F12089105491898b4bf70102eb77d%2Ffi-hotprop-makowsky-billionaire.jpg',
@@ -53,7 +61,7 @@ export default function DetalleServicio() {
 					</TouchableOpacity>
 				</View>
 				<View style={styles.containerBotones}>
-					<TouchableOpacity style={styles.button}>
+					<TouchableOpacity style={styles.button} onPress={irAChat}>
 						<Text style={styles.buttonText}>Chat</Text>
 					</TouchableOpacity>
 				</View>
@@ -130,7 +138,6 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		width: 370,
 		marginLeft: 20,
-		marginTop: 40,
 		backgroundColor: '#fff',
 		overflow: 'hidden', // Recortar el contenido si se desborda
 	},

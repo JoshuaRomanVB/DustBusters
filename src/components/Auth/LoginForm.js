@@ -159,7 +159,11 @@ Función para establecer el esquema de validación del formulario.
   }
 
   function irACrearCuenta() {
-    navigation.navigate("CreateCuenta");
+    navigation.navigate("CrearCuentaTipo");
+  }
+
+  function irAOlvidaste() {
+    navigation.navigate("Olvide");
   }
 
   return (
@@ -205,7 +209,7 @@ Función para establecer el esquema de validación del formulario.
         {formik.errors.password !== "" && (
           <Text style={styles.error}>{formik.errors.password}</Text>
         )}
-        <TouchableOpacity>
+        <TouchableOpacity onPress={irAOlvidaste}>
           <Text style={styles.olvide}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
         <CustomButton title="Iniciar sesión" onPress={formik.handleSubmit} />
@@ -214,7 +218,7 @@ Función para establecer el esquema de validación del formulario.
           <TouchableOpacity onPress={irACrearCuenta}>
             <Text style={styles.signupText}>
               ¿No tienes una cuenta?{" "}
-              <Text style={styles.signupLink}>Registrate qquí</Text>
+              <Text style={styles.signupLink}>Registrate aquí</Text>
             </Text>
           </TouchableOpacity>
         </View>

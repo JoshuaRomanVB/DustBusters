@@ -1,26 +1,21 @@
 import { View, Text, Image, StyleSheet } from "react-native";
 import React from "react";
-import Account from "../screen/Account";
-import Favoritos from "../screen/Favoritos";
-import Rickandmorty from "../screen/Rickandmorty";
 import { createBottomTabNavigator, BottomTabBar } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/FontAwesome5";
-import NavigationAccount from "./NavigationAccount";
-import NavigationFavoritos from "./NavigationFavoritos";
-import RickandmortyApi from "../api/RickandmortyApi";
-import NavigationPersonaje from "./NavigationPersonaje";
-import NavigationHome from "./NavigationHome";
+import PerfilScreen from "../screen/PerfilScreen";
+import Historial from "../screen/Historial";
+import MisSolicitudes from "../screen/MisSolicitudes";
 
 export default function Navigation() {
   const Tab = createBottomTabNavigator();
 
   const tabBarOptions = {
-    activeTintColor: "#1dadc0", // Cambiar aquí el color deseado para el icono activo
+    activeTintColor: "#F64141", // Cambiar aquí el color deseado para el icono activo
     inactiveTintColor: "gray", // Cambiar aquí el color deseado para el icono inactivo
   };
 
   const tabBarStyle = {
-    backgroundColor: "#bbdf5e", // Cambiar aquí el color deseado para el fondo del tab
+    backgroundColor: "#F64141", // Cambiar aquí el color deseado para el fondo del tab
   };
 
   return (
@@ -29,15 +24,14 @@ export default function Navigation() {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
           let iconName;
-
+  
           if (route.name === "account") {
             iconName = "user";
           } else if (route.name === "home") {
             return renderIconRM();
-          } else if (route.name === "favoritos") {
-            iconName = "heart";
+          } else if (route.name === "historial") {
+            iconName = "history";
           }
-
           return <Icon name={iconName} color={color} size={size} />;
         },
       })}
@@ -47,17 +41,18 @@ export default function Navigation() {
         </View>
       )}
     >
-      <Tab.Screen name="account" component={NavigationAccount} options={{ tabBarLabel: "Mi cuenta" }} />
-      <Tab.Screen name="home" component={NavigationHome} options={{ tabBarLabel: "" }} />
-      <Tab.Screen name="favoritos" component={NavigationFavoritos} options={{ tabBarLabel: "Favoritos" }} />
+      <Tab.Screen name="account" component={PerfilScreen} options={{ tabBarLabel: "Perfil" }} />
+      <Tab.Screen name="home" component={MisSolicitudes} options={{ tabBarLabel: "" }} />
+      <Tab.Screen name="historial" component={Historial} options={{ tabBarLabel: "Historial" }} />
     </Tab.Navigator>
   );
+  
 }
 
 const renderIconRM = () => {
   return (
     <Image
-      source={require("../assets/images/iconoram.png")}
+      source={require("../assets/images/logoapp.png")}
       style={{ width: 75, height: 75, top: -20 }}
     />
   );
@@ -66,7 +61,7 @@ const renderIconRM = () => {
 const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: "#FFF",
-    borderColor: "#f6f023",
+    borderColor: "#F64141",
     borderTopWidth: 2, // Opcionalmente, puedes eliminar la línea superior del tab
     elevation: 0, // Opcionalmente, puedes eliminar la sombra del tab en dispositivos Android
   },

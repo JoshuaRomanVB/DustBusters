@@ -9,8 +9,14 @@ import {
 } from "react-native";
 import React from "react";
 import ButtonLogin from "../components/ButtonCrear";
+import CustomHeader from "../components/CustomHeader";
 
-export default function CrearCuenta(props) {
+export default function CrearClienteFoto({navigation}) {
+  
+  function irACrearCuentaForm() {
+    navigation.navigate("CrearCuentaForm");
+  }
+  
   return (
     <View style={styles.mainContainer}>
       <ImageBackground
@@ -18,8 +24,9 @@ export default function CrearCuenta(props) {
         style={styles.imageback}
       >
         <View style={styles.overlay}>
+        <CustomHeader />
           <View style={styles.imageContainer}>
-            <Text style={styles.titleH}>¡Bienvenido Cliente!</Text>
+            <Text style={styles.titleH}>¡BIENVENIDO CLIENTE!</Text>
             <Text style={styles.subTitulo}>
               Esperamos que tu experiencia sea de lo mejor
             </Text>
@@ -38,7 +45,7 @@ export default function CrearCuenta(props) {
         </View>
         <View style={styles.containerForm}>
           <ButtonLogin
-            onPress={() => props.navigation.navigate("CrearCuenta")}
+            onPress={irACrearCuentaForm}
             title="Continuar"
           />
         </View>
@@ -77,6 +84,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 25,
     marginTop: 25,
+    marginHorizontal:10,
   },
   inputText: {
     height: 60,
@@ -111,8 +119,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     textAlign: "center",
-    fontSize: 30,
-    marginTop: 80,
+    fontSize: 40
   },
   image: {
     width: 188,

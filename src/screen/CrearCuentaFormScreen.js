@@ -23,13 +23,12 @@ import AwesomeAlert from "react-native-awesome-alerts";
 import * as ImagePicker from "expo-image-picker";
 import { db,auth,storage } from "../utils/firebaseConfig";
 import { collection, query, onSnapshot, orderBy, addDoc } from "firebase/firestore";
-
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import CustomButton from "../components/CustomButton";
 
 
-const RegisterScreen = ({ navigation }) => {
+const CrearCuentaFormScreen = ({ navigation }) => {
   //Alert dialog
   const [showAlert, setShowAlert] = useState(false);
   const [showAlertProgress, setShowAlertProgress] = useState(false);
@@ -113,8 +112,8 @@ const RegisterScreen = ({ navigation }) => {
     navigation.navigate("Login");
   }
 
-  function irTipo() {
-    navigation.navigate("Tipo");
+  function irTabs() {
+    navigation.navigate("Tabs");
   }
 
   const handleChooseImage = async () => {
@@ -331,11 +330,11 @@ const registerUser = async (name, email, password, imageUri) => {
         {passwordError !== "" && (
           <Text style={registerStyles.errorText}>{passwordError}</Text>
         )}
-         <CustomButton title="Registrarse" onPress={irTipo} />
+         <CustomButton title="Registrarse" onPress={irTabs} />
         <ButtonText onPress={irALogin} text="¿Ya tienes cuenta?  Inicia sesión aqui" />
       </View>
     </SafeAreaView>
   );
 };
 
-export default RegisterScreen;
+export default CrearCuentaFormScreen;
