@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
 	View,
 	Text,
@@ -12,6 +12,24 @@ import {
 const windowHeight = Dimensions.get('window').height;
 
 const ValidacionTel = () => {
+	const [codigo, setCodigo] = useState('');
+	const [codigoValido, setCodigoValido] = useState(true);
+
+	const validarCodigo = () => {
+		// Expresión regular para validar el telefono
+		const regexCodigo = /^\d{9}$/;
+		setCodigoValido(regexCodigo.test(codigo));
+	};
+
+	const handleEnviar = () => {
+		// Si el correo es válido, realizar la acción de envío aquí
+		if (codigoValido) {
+			// Tu lógica para enviar el correo de recuperación de contraseña
+			console.log('Codigo válido:', codigo);
+		} else {
+			console.log('Codigo no válido.');
+		}
+	};
 	return (
 		<ImageBackground
 			source={require('../../src/assets/images/ghostb.png')}
@@ -39,11 +57,26 @@ const ValidacionTel = () => {
 					<Text style={styles.textCodigo}>Código</Text>
 					<TextInput
 						placeholder='12345678'
-						style={styles.inputText}
+						style={[
+							styles.inputText,
+							!codigoValido ? { borderColor: 'red' } : null,
+						]}
 						autoCapitalize='none'
-						secureTextEntry={true}
+						onChangeText={(text) => {
+							setCodigo(text);
+							validarCodigo(text);
+						}}
+						keyboardType='numeric'
+						onSubmitEditing={() => {
+							// Aquí puedes agregar alguna lógica adicional si es necesario
+							Keyboard.dismiss(); // Esto cerrará el teclado automáticamente
+						}}
 					/>
-					<TouchableOpacity style={styles.button}>
+
+					{!codigoValido && (
+						<Text style={styles.errorText}>¡Codigo inválido!</Text>
+					)}
+					<TouchableOpacity style={styles.button} onPress={handleEnviar}>
 						<Text style={styles.buttonText}>Validar</Text>
 					</TouchableOpacity>
 				</View>
@@ -129,6 +162,12 @@ const styles = StyleSheet.create({
 		borderColor: '#000', // Cambia el color del borde aquí
 		borderWidth: 2, // Asegúrate de especificar el ancho del borde
 		width: 200,
+	},
+	errorText: {
+		color: 'red',
+		fontSize: 16,
+		marginTop: 5,
+		textAlign: 'center',
 	},
 });
 
