@@ -6,7 +6,7 @@ import PerfilScreen from "../screen/PerfilScreen";
 import Historial from "../screen/Historial";
 import MisSolicitudes from "../screen/MisSolicitudes";
 
-export default function Navigation() {
+export default function TabsLimpiador() {
   const Tab = createBottomTabNavigator();
 
   const tabBarOptions = {

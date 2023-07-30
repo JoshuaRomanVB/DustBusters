@@ -2,7 +2,7 @@ import { View, Text } from "react-native";
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import LoginForm from "../components/Auth/LoginForm";
-import Navigation from "./Tabs";
+import TabsCliente from "./TabsCliente";
 import CrearCuentaTipo from "../screen/CrearCuentaTipo";
 import CrearLimpiadorFoto from "../screen/CrearLimpiadorFoto";
 import CrearClienteFoto from "../screen/CrearClienteFoto";
@@ -12,7 +12,6 @@ import CrearDocumentacionLimpiador from "../screen/CrearDocumentacionLimpiador";
 import CreditCardsScreen from "../screen/CreditCardsScreen";
 import CreateCreditCardsScreen from "../screen/CreateCreditCardsScreen";
 import Calificaciones from "../screen/Calificaciones";
-import MisSolicitudes from "../screen/MisSolicitudes";
 import CrearServcio from "../screen/CrearServicio";
 import DetalleServicio from "../screen/DetalleServicio";
 import Chat from "../screen/Chat";
@@ -20,15 +19,20 @@ import Chat from "../screen/Chat";
 export default function NavigationAccount() {
   const Stack = createStackNavigator();
   return (
-    <Stack.Navigator initialRouteName="Tabs">
+    <Stack.Navigator initialRouteName="Login">
       <Stack.Screen
         name="Login"
         component={LoginForm}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="Tabs"
-        component={Navigation}
+        name="TabsClientes"
+        component={TabsCliente}
+        options={{ headerShown: false }}
+      />
+            <Stack.Screen
+        name="TabsLimpidores"
+        component={TabsCliente}
         options={{ headerShown: false }}
       />
       <Stack.Screen
@@ -76,11 +80,7 @@ export default function NavigationAccount() {
         component={Calificaciones}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
-        name="MisSolicitudes"
-        component={MisSolicitudes}
-        options={{ headerShown: false }}
-      />
+
       <Stack.Screen
         name="CrearServicio"
         component={CrearServcio}

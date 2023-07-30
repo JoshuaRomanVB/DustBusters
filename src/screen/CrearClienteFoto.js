@@ -7,16 +7,59 @@ import {
   Image,
   ImageBackground,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import ButtonLogin from "../components/ButtonCrear";
 import CustomHeader from "../components/CustomHeader";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
+import * as ImagePicker from "expo-image-picker";
 
-export default function CrearClienteFoto({navigation}) {
-  
+export default function CrearClienteFoto({ navigation }) {
+  const [fileBlob, setFileBlob] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [imageUri, setImageUri] = useState("");
   function irACrearCuentaForm() {
-    navigation.navigate("CrearCuentaForm");
+    navigation.navigate("CrearCuentaForm", {
+      fileBlob: fileBlob,
+      fileName: fileName,
+    });
   }
-  
+  const handleChooseImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      console.log("Permission denied");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    if (!result.canceled) {
+      const fileUri = result.assets[0].uri;
+      const fileName = fileUri.substring(fileUri.lastIndexOf("/") + 1);
+
+      try {
+        // Obtener los datos del archivo como un blob utilizando fetch
+        const fileResponse = await fetch(fileUri);
+        const fileBlob = await fileResponse.blob();
+
+        // Mostrar la imagen seleccionada sin subirla a Firebase Storage
+        setImageUri(fileUri);
+
+        // Guardar la imagen en una variable para subirla posteriormente
+        setFileBlob(fileBlob);
+        setFileName(fileName);
+      } catch (error) {
+        console.error("Error al leer el archivo:", error);
+      }
+    } else {
+      console.log(result);
+    }
+  };
+
+
   return (
     <View style={styles.mainContainer}>
       <ImageBackground
@@ -24,30 +67,41 @@ export default function CrearClienteFoto({navigation}) {
         style={styles.imageback}
       >
         <View style={styles.overlay}>
-        <CustomHeader />
+          <CustomHeader />
           <View style={styles.imageContainer}>
             <Text style={styles.titleH}>¡BIENVENIDO CLIENTE!</Text>
             <Text style={styles.subTitulo}>
               Esperamos que tu experiencia sea de lo mejor
             </Text>
+            <View style={styles.imageContainer}>
+              <View style={styles.imageWrapper}>
+              {imageUri ? (
+            <Image source={{uri: imageUri}} style={styles.image} />
+          ) : (
             <Image
-              source={require("../assets/images/logoapp.png")}
-              style={styles.image}
-            />
-            <Image
-              source={require("../assets/images/plus.png")}
-              style={styles.image2}
-            />
-            <Text style={styles.subTitulo}>
-              Agrega una foto para que los DustBusters confien en ti
-            </Text>
+            source={require("../assets/images/logoapp.png")}
+            style={styles.image}
+          />
+          )}
+             
+                <TouchableOpacity
+                  onPress={handleChooseImage}
+                  style={styles.addButton}
+                >
+                  <Image
+                    source={require("../assets/images/plus.png")}
+                    style={styles.plusIcon}
+                  />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.subTitulo}>
+                Agrega una foto para que los DustBusters confíen en ti
+              </Text>
+            </View>
           </View>
         </View>
         <View style={styles.containerForm}>
-          <ButtonLogin
-            onPress={irACrearCuentaForm}
-            title="Continuar"
-          />
+          <ButtonLogin onPress={irACrearCuentaForm} title="Continuar" />
         </View>
       </ImageBackground>
     </View>
@@ -84,7 +138,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 25,
     marginTop: 25,
-    marginHorizontal:10,
+    marginHorizontal: 10,
   },
   inputText: {
     height: 60,
@@ -119,14 +173,38 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     textAlign: "center",
-    fontSize: 40
+    fontSize: 40,
   },
   image: {
     width: 188,
     height: 210,
+    borderRadius: 90
   },
   image2: {
-    marginTop: -80,
-    marginRight: -150,
+    marginTop: -20,
+    marginRight: -20,
+  },
+  
+  imageContainer: {
+    alignItems: "center",
+    marginVertical: 10,
+    justifyContent: "center",
+    position: "relative",
+  },
+
+  imageWrapper: {
+    flexDirection: "row", // Establece los elementos en una fila horizontal
+    alignItems: "center", // Alinea los elementos verticalmente en el centro
+    marginTop: 20, // Mueve el contenedor ligeramente hacia arriba si es necesario
+  },
+
+  image: {
+    width: 188,
+    height: 210,
+    borderRadius:180
+  },
+
+  addButton: {
+    marginLeft: 20, // Agrega un espacio entre la imagen y el botón "más"
   },
 });

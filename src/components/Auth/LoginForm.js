@@ -7,25 +7,25 @@
 import {
   View,
   Text,
-  TextInput,
-  Button,
   StyleSheet,
   TouchableOpacity,
   Image,
   ImageBackground,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import CustomButton from "../CustomButton";
-import {auth} from "../../utils/firebaseConfig"
 import Input from "../Input";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import useAuth from "../../hooks/useAuth";
-import { db } from "../../utils/firebaseConfig";
-import { collection, query, where, getDocs, onSnapshot, orderBy, getDoc } from 'firebase/firestore';
 import { colors } from "../../styles/colors";
 import { color } from "react-native-reanimated";
+import axios from 'axios';
+import {
+  saveUserId,
+  saveUserData,
+  saveUserToken,
+  getUserData
+} from '../../utils/sessionStorage';
 
 /**
 Componente de formulario de inicio de sesión
@@ -39,49 +39,17 @@ También maneja la validación del formulario y la autenticación del usuario.
 export default function LoginForm(props) {
   const { navigation } = props;
   const [error, setError] = useState("");
-  const { login } = useAuth();
 
-  /**
-   * Función para obtener datos de usuario de la base de datos
-   * @date 7/14/2023 - 12:56:21 AM
-   * @author Alessandro Guevara
-   *
-   * @param {String} idUser - id de usuario
-   * @returns {Promise Object} - objeto con estatus y datos de usuario
-   */
-  const getUserData = async (idUser) => {
-    return new Promise(async (resolve) => {
-      // Creamos referencia a la base de datos y a la colección
-      try {
-        const refCollection = collection(db, 'Usuarios');
-        const searchQuery = query(refCollection, where('uid', '==', idUser));
-        const queryFetch = await getDocs(searchQuery);
-
-        let userData;
-        queryFetch.docs.map((user) => {
-          userData = user.data();
-        });
-
-        let objResp = {
-          status: true,
-          user_data: userData,
-        }
-        resolve(objResp);
-
-      } catch (error) {
-        console.log("ERROR GET DATA USER");
-        console.log(error);
-        let objResp = {
-          status: false,
-        }
-        resolve(objResp);
-      }
-
-    })
+  useEffect(() => {
+    // Obtener los datos de usuario almacenados en el almacenamiento local
+    const userData = getUserData();
     
-    
-
-  }
+    // Verificar si hay datos de usuario
+    if (userData && Object.keys(userData).length > 0) {
+      // Si hay datos de usuario, navegar directamente a "TabsClientes"
+      navigation.navigate("TabsClientes");
+    }
+  }, []);
     
   const formik = useFormik({
     initialValues: initialValues(),
@@ -89,47 +57,34 @@ export default function LoginForm(props) {
     validateOnChange: false,
     onSubmit: async (formData) => {
       setError("");
-      const { email, password } = formData;
-
+      const { email, password} = formData;
+  
       try {
-        signInWithEmailAndPassword(auth, email, password)
-          .then((userCredential) => {
-            // Acceso exitoso
-            const user = userCredential.user;
-            const id_user = user.uid;
-            const email_user = user.email;
-            console.log(user);
-
-            getUserData(id_user).then((result) => {
-              if(result.status) {
-                const user_data = result.user_data;
-                const objUser = {
-                  id_user: id_user,
-                  email_user: email_user,
-                  name_user: user_data.name,
-                  avatar_user: user_data.imageUri
-                }
-                login(objUser);
-                
-                navigation.navigate("Tabs");
-              }else {
-                setError("Usuario no encontrado");
-
-              }
-            })
-            
-            
-          })
-          .catch((error) => {
-            // Error de autenticación
-            console.log(error);
-            setError("Usuario o contraseña incorrecta");
-          });
-
-        // Aquí puedes redirigir al usuario a la pantalla de inicio o hacer cualquier otra acción necesaria después del inicio de sesión exitoso.
+        // Realizar la solicitud de inicio de sesión a la API
+        const response = await axios.post('http://192.168.100.154:8080/api/auth/signin', {
+          correo: email,
+          password: password,
+        });
+        saveUserId(response.data.usuario.userId.toString());
+        saveUserData(response.data.usuario);
+        saveUserToken(response.data.token);
+  
+        // Aquí puedes manejar la respuesta de la API según tus necesidades
+        console.log(response.data); // O cualquier otra acción que desees realizar
+  
+        // Por ejemplo, si el inicio de sesión fue exitoso y recibiste un token de acceso, podrías guardar ese token en el almacenamiento local o en una cookie para futuras solicitudes a la API.
+  
+        if (response.data.usuario.tipoUsuario === 1) {
+          // Si el tipoUsuario es igual a 1, navegar a la pantalla TabsClientes
+          navigation.navigate("TabsClientes");
+        } else {
+          // De lo contrario, puedes navegar a otra pantalla (por ejemplo, TabsLimpiador) o realizar otra lógica según tus necesidades
+          // navigation.navigate("TabsLimpiador");
+        }
       } catch (error) {
-        console.log("Error de inicio de sesión:", error);
-        setError("Usuario o contraseña incorrecta");
+        // Si ocurre un error en la solicitud, puedes manejarlo aquí
+        console.error('Error al iniciar sesión:', error);
+        setError("Error al iniciar sesión. Por favor, verifica tus credenciales.");
       }
     },
   });

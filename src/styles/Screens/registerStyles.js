@@ -68,7 +68,7 @@ export const registerStyles = StyleSheet.create({
       bottom: 0,
       left: 0,
       right: 0,
-      height: 400,
+      height: 500,
     },
     overlay: {
       flex: 1,
@@ -79,7 +79,7 @@ export const registerStyles = StyleSheet.create({
       fontWeight: "bold",
       textAlign: "center",
       fontSize: 34,
-      marginTop: 70,
+      marginTop: 20,
     },
     subtitle: {
       color: "#fff",

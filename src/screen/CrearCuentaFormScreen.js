@@ -16,19 +16,17 @@ import {
 } from "react-native";
 import { registerStyles } from "../styles/Screens/registerStyles";
 import Input from "../components/Input";
-import ButtonPrymary from "../components/ButtonPrymary";
 import ButtonText from "../components/ButtonText";
 import { colors } from "../styles/colors";
 import AwesomeAlert from "react-native-awesome-alerts";
-import * as ImagePicker from "expo-image-picker";
-import { db,auth,storage } from "../utils/firebaseConfig";
-import { collection, query, onSnapshot, orderBy, addDoc } from "firebase/firestore";
+import { storage } from "../utils/firebaseConfig";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import CustomButton from "../components/CustomButton";
+import axios from "axios";
+import CustomHeader from "../components/CustomHeader";
 
-
-const CrearCuentaFormScreen = ({ navigation }) => {
+const CrearCuentaFormScreen = ({ navigation, route }) => {
+  const { fileBlob, fileName } = route.params;
   //Alert dialog
   const [showAlert, setShowAlert] = useState(false);
   const [showAlertProgress, setShowAlertProgress] = useState(false);
@@ -40,19 +38,13 @@ const CrearCuentaFormScreen = ({ navigation }) => {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [telefono, setTelefono] = useState("");
   const [password, setPassword] = useState("");
   const [imageUri, setImageUri] = useState("");
 
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-
-  const [fileBlob, setFileBlob] = useState("");
-  const [fileName, setFileName] = useState("");
-
-  // Definir una referencia a una colección
-  const refCollection = collection(db, "Tiendas");
-  const queryFetch = query(refCollection);
 
   const validateFields = () => {
     let isValid = true;
@@ -113,45 +105,8 @@ const CrearCuentaFormScreen = ({ navigation }) => {
   }
 
   function irTabs() {
-    navigation.navigate("Tabs");
+    navigation.navigate("TabsClientes");
   }
-
-  const handleChooseImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      console.log("Permission denied");
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      const fileUri = result.assets[0].uri;
-      const fileName = fileUri.substring(fileUri.lastIndexOf("/") + 1);
-
-      try {
-        // Obtener los datos del archivo como un blob utilizando fetch
-        const fileResponse = await fetch(fileUri);
-        const fileBlob = await fileResponse.blob();
-
-        // Mostrar la imagen seleccionada sin subirla a Firebase Storage
-        setImageUri(fileUri);
-
-        // Guardar la imagen en una variable para subirla posteriormente
-        setFileBlob(fileBlob);
-        setFileName(fileName);
-      } catch (error) {
-        console.error("Error al leer el archivo:", error);
-      }
-    } else {
-      console.log(result);
-    }
-  };
 
   // Función para subir la imagen a Firebase Storage y actualizar el enlace en el servidor
   const handleUploadImage = async () => {
@@ -161,23 +116,24 @@ const CrearCuentaFormScreen = ({ navigation }) => {
         // Crear una referencia al archivo en Firebase Storage
         const filePath = `usuarios/${fileName}`;
         const storageRef = ref(storage, filePath);
-  
+
         // Subir el blob al Firebase Storage
         const uploadTask = uploadBytesResumable(storageRef, fileBlob);
-  
+
         uploadTask.on(
           "state_changed",
           (snapshot) => {
             // Observar eventos de cambio de estado como progreso, pausa y reanudación
             // Obtener el progreso de la tarea, incluyendo el número de bytes subidos y el número total de bytes a subir
-            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            console.log('Upload is ' + progress + '% done');
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log("Upload is " + progress + "% done");
             switch (snapshot.state) {
-              case 'paused':
-                console.log('Upload is paused');
+              case "paused":
+                console.log("Upload is paused");
                 break;
-              case 'running':
-                console.log('Upload is running');
+              case "running":
+                console.log("Upload is running");
                 break;
             }
           },
@@ -189,11 +145,11 @@ const CrearCuentaFormScreen = ({ navigation }) => {
             // Manejar subida exitosa en la finalización
             // Por ejemplo, obtener la URL de descarga: https://firebasestorage.googleapis.com/...
             getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-              console.log('File available at', downloadURL);
-  
+              console.log("File available at", downloadURL);
+
               // Actualizar la URL de la imagen en tu estado
               setImageUri(downloadURL);
-  
+
               // Llamar a handleregister con la nueva imagen
               handleregister(downloadURL);
             });
@@ -215,10 +171,40 @@ const CrearCuentaFormScreen = ({ navigation }) => {
       setShowButton(false);
       setShowAlertTittle("Guardando usuario");
       setShowAlertMessage("Por favor espera...");
+
+      const userData = {
+        nombreCompleto: name,
+        numeroTelefono: telefono,
+        correo: email,
+        password: password,
+        enabled: true,
+        direccion: "Calle Principal, Ciudad",
+        estado: "Calle Principal, Ciudad",
+        ciudad: "Calle Principal, Ciudad",
+        curp: "Calle Principal, Ciudad",
+        tipoUsuario: 1,
+        fotoPerfil: imageURL,
+        fechaRegistro: "2023-07-27T12:34:56",
+        ultimaSesion: "2023-07-27T15:30:00",
+        authorities: [
+          {
+            authority: "ROLE_USER",
+          },
+          {
+            authority: "ROLE_ADMIN",
+          },
+        ],
+      };
+
       try {
-        // Registrar usuario en Firebase Authentication y guardar datos en Firestore
-        await registerUser(name, email, password, imageURL);
-  
+        // Realizar la solicitud de inicio de sesión a la API
+        const response = await axios.post(
+          "http://192.168.100.154:8080/api/auth/signup",
+          userData
+        );
+        // Aquí puedes manejar la respuesta de la API según tus necesidades
+        console.log(response.data); // O cualquier otra acción que desees realizar
+
         setShowAlertProgress(false);
         setShowButton(true);
         setShowAlertTittle("Éxito en el guardado");
@@ -234,29 +220,7 @@ const CrearCuentaFormScreen = ({ navigation }) => {
       }
     }
   };
-  
 
-  // Función para registrar un nuevo usuario
-const registerUser = async (name, email, password, imageUri) => {
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-
-    // Guardar información adicional del usuario en Firestore
-    const userDocRef = await addDoc(collection(db, 'Usuarios'), {
-      uid: user.uid,
-      name: name,
-      email: user.email,
-      imageUri: imageUri,
-      vendedor: false,
-      // Agrega otros campos adicionales que desees almacenar
-    });
-
-    console.log('Usuario registrado:', userDocRef.id);
-  } catch (error) {
-    console.error('Error al registrar usuario:', error);
-  }
-};
   return (
     <SafeAreaView style={globalstyles.container}>
       <ImageBackground
@@ -264,9 +228,11 @@ const registerUser = async (name, email, password, imageUri) => {
         style={registerStyles.imageback}
       >
         <View style={registerStyles.overlay}>
+          <CustomHeader/>
           <Text style={registerStyles.titleH}>TU INFORMACIÓN</Text>
-          <Text style={registerStyles.subtitle}>Para terminar tu registro rellena el formulario</Text>
-
+          <Text style={registerStyles.subtitle}>
+            Para terminar tu registro rellena el formulario
+          </Text>
         </View>
       </ImageBackground>
 
@@ -297,7 +263,6 @@ const registerUser = async (name, email, password, imageUri) => {
       />
 
       <View style={registerStyles.containerForm}>
-    
         <Text style={[typography.body, registerStyles.inputText]}>Nombre</Text>
         <Input
           placeholderText="Nombre "
@@ -311,9 +276,20 @@ const registerUser = async (name, email, password, imageUri) => {
           Correo electronico
         </Text>
         <Input
+          placeholderText="vaz@gmail.com"
+          iconName="mail"
+          onChangeText={setEmail}
+        />
+        {emailError !== "" && (
+          <Text style={registerStyles.errorText}>{emailError}</Text>
+        )}
+        <Text style={[typography.body, registerStyles.inputText]}>
+          Telefono
+        </Text>
+        <Input
           placeholderText="+52 344 543 2345"
           iconName="call"
-          onChangeText={setEmail}
+          onChangeText={setTelefono}
         />
         {emailError !== "" && (
           <Text style={registerStyles.errorText}>{emailError}</Text>
@@ -330,8 +306,11 @@ const registerUser = async (name, email, password, imageUri) => {
         {passwordError !== "" && (
           <Text style={registerStyles.errorText}>{passwordError}</Text>
         )}
-         <CustomButton title="Registrarse" onPress={irTabs} />
-        <ButtonText onPress={irALogin} text="¿Ya tienes cuenta?  Inicia sesión aqui" />
+        <CustomButton title="Registrarse" onPress={handleUploadImage} />
+        <ButtonText
+          onPress={irALogin}
+          text="¿Ya tienes cuenta?  Inicia sesión aqui"
+        />
       </View>
     </SafeAreaView>
   );
