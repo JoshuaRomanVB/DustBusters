@@ -41,15 +41,30 @@ export default function LoginForm(props) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Obtener los datos de usuario almacenados en el almacenamiento local
-    const userData = getUserData();
-    
-    // Verificar si hay datos de usuario
-    if (userData && Object.keys(userData).length > 0) {
-      // Si hay datos de usuario, navegar directamente a "TabsClientes"
-      navigation.navigate("TabsClientes");
-    }
-  }, []);
+    // Función asincrónica para verificar los datos de usuario almacenados en el AsyncStorage
+    const checkUserData = async () => {
+      try {
+        // Obtener los datos de usuario almacenados en el AsyncStorage
+        const userData = await getUserData();
+
+        // Verificar si hay datos de usuario almacenados
+        if (userData) {
+          // Si hay datos de usuario, navegar directamente a "TabsClientes"
+          navigation.navigate("TabsClientes");
+        } else {
+          // Si no hay datos de usuario, navegar a la pantalla de inicio de sesión
+          navigation.navigate("Login");
+        }
+      } catch (error) {
+        console.log("Error al obtener los datos del usuario:", error);
+        // En caso de error al obtener los datos del usuario, navegar a la pantalla de inicio de sesión por precaución
+        navigation.navigate("Login");
+      }
+    };
+
+    // Llamar a la función de verificación al cargar el componente
+    checkUserData();
+  }, [navigation]);
     
   const formik = useFormik({
     initialValues: initialValues(),

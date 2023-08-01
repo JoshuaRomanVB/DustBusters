@@ -171,40 +171,59 @@ const CrearCuentaFormScreen = ({ navigation, route }) => {
       setShowButton(false);
       setShowAlertTittle("Guardando usuario");
       setShowAlertMessage("Por favor espera...");
-
-      const userData = {
-        nombreCompleto: name,
-        numeroTelefono: telefono,
-        correo: email,
-        password: password,
-        enabled: true,
-        direccion: "Calle Principal, Ciudad",
-        estado: "Calle Principal, Ciudad",
-        ciudad: "Calle Principal, Ciudad",
-        curp: "Calle Principal, Ciudad",
-        tipoUsuario: 1,
-        fotoPerfil: imageURL,
-        fechaRegistro: "2023-07-27T12:34:56",
-        ultimaSesion: "2023-07-27T15:30:00",
-        authorities: [
-          {
-            authority: "ROLE_USER",
-          },
-          {
-            authority: "ROLE_ADMIN",
-          },
-        ],
-      };
-
+  
       try {
-        // Realizar la solicitud de inicio de sesión a la API
-        const response = await axios.post(
+        // Primera petición: Crear usuario en Openpay
+        const openpayResponse = await axios.post(
+          "https://sandbox-api.openpay.mx/v1/mqmsrg8kqp8emsh76dgj/customers",
+          {
+            name: name,
+            email: email,
+            phone_number: telefono,
+            requires_account: false,
+          },
+          {
+            headers: {
+              Authorization: "Basic c2tfOTE0ZGUzODljM2E3NDA1ZDkxNGViM2ExMGFiNzE3M2U6",
+            },
+          }
+        );
+  
+        // Aquí puedes hacer algo con la respuesta de Openpay, como guardar el ID del cliente en el estado o en el almacenamiento local.
+        const openpayCustomerId = openpayResponse.data.id;
+  
+        // Segunda petición: Guardar datos del usuario en tu API
+        const userData = {
+          nombreCompleto: name,
+          numeroTelefono: telefono,
+          correo: email,
+          password: password,
+          enabled: true,
+          telefono: telefono,
+          curp: "ESSF",
+          userIdOpenpay: openpayCustomerId,
+          tipoUsuario: 1,
+          fotoPerfil: imageURL,
+          fechaRegistro: "2023-07-27T12:34:56",
+          ultimaSesion: "2023-07-27T15:30:00",
+          authorities: [
+            {
+              authority: "ROLE_USER",
+            },
+            {
+              authority: "ROLE_ADMIN",
+            },
+          ],
+        };
+  
+        const apiResponse = await axios.post(
           "http://192.168.100.154:8080/api/auth/signup",
           userData
         );
-        // Aquí puedes manejar la respuesta de la API según tus necesidades
-        console.log(response.data); // O cualquier otra acción que desees realizar
-
+  
+        // Aquí puedes manejar la respuesta de tu API según tus necesidades
+        console.log(apiResponse.data); // O cualquier otra acción que desees realizar
+  
         setShowAlertProgress(false);
         setShowButton(true);
         setShowAlertTittle("Éxito en el guardado");
@@ -220,6 +239,7 @@ const CrearCuentaFormScreen = ({ navigation, route }) => {
       }
     }
   };
+  
 
   return (
     <SafeAreaView style={globalstyles.container}>

@@ -15,6 +15,7 @@ import Calificaciones from "../screen/Calificaciones";
 import CrearServcio from "../screen/CrearServicio";
 import DetalleServicio from "../screen/DetalleServicio";
 import Chat from "../screen/Chat";
+import EditProfileScreen from "../screen/EditProfileScreen";
 
 export default function NavigationAccount() {
   const Stack = createStackNavigator();
@@ -30,7 +31,7 @@ export default function NavigationAccount() {
         component={TabsCliente}
         options={{ headerShown: false }}
       />
-            <Stack.Screen
+      <Stack.Screen
         name="TabsLimpidores"
         component={TabsCliente}
         options={{ headerShown: false }}
@@ -91,9 +92,15 @@ export default function NavigationAccount() {
         component={DetalleServicio}
         options={{ headerShown: false }}
       />
-            <Stack.Screen
+      <Stack.Screen
         name="Chat"
         component={Chat}
+        options={{ headerShown: false }}
+      />
+
+<Stack.Screen
+        name="EditarUsuario"
+        component={EditProfileScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

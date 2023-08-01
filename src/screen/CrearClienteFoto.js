@@ -24,40 +24,60 @@ export default function CrearClienteFoto({ navigation }) {
       fileName: fileName,
     });
   }
-  const handleChooseImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      console.log("Permission denied");
-      return;
+
+  // Agrega esta función al mismo archivo o importa desde el archivo donde se define
+  function uriToBlob(uri) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+
+    xhr.onload = function () {
+      resolve(xhr.response);
+    };
+
+    xhr.onerror = function () {
+      reject(new Error('uriToBlob failed'));
+    };
+
+    xhr.responseType = 'blob';
+    xhr.open('GET', uri, true);
+    xhr.send(null);
+  });
+}
+
+
+const handleChooseImage = async () => {
+  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (status !== "granted") {
+    console.log("Permission denied");
+    return;
+  }
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    aspect: [4, 3],
+    quality: 1,
+  });
+  if (!result.canceled) {
+    const fileUri = result.assets[0].uri;
+    const fileName = fileUri.substring(fileUri.lastIndexOf("/") + 1);
+
+    try {
+      // Convertir la URI a un Blob utilizando la función uriToBlob
+      const fileBlob = await uriToBlob(fileUri);
+
+      // Mostrar la imagen seleccionada sin subirla a Firebase Storage
+      setImageUri(fileUri);
+
+      // Guardar el Blob y el nombre del archivo en variables para subirlos posteriormente
+      setFileBlob(fileBlob);
+      setFileName(fileName);
+    } catch (error) {
+      console.error("Error al leer el archivo:", error);
     }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-    if (!result.canceled) {
-      const fileUri = result.assets[0].uri;
-      const fileName = fileUri.substring(fileUri.lastIndexOf("/") + 1);
-
-      try {
-        // Obtener los datos del archivo como un blob utilizando fetch
-        const fileResponse = await fetch(fileUri);
-        const fileBlob = await fileResponse.blob();
-
-        // Mostrar la imagen seleccionada sin subirla a Firebase Storage
-        setImageUri(fileUri);
-
-        // Guardar la imagen en una variable para subirla posteriormente
-        setFileBlob(fileBlob);
-        setFileName(fileName);
-      } catch (error) {
-        console.error("Error al leer el archivo:", error);
-      }
-    } else {
-      console.log(result);
-    }
-  };
+  } else {
+    console.log(result);
+  }
+};
 
 
   return (

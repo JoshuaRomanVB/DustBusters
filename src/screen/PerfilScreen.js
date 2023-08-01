@@ -29,6 +29,10 @@ export default function PerfilScreen({ navigation }) {
   function irACalificaciones() {
     navigation.navigate("Calificaciones");
   }
+  
+  function irAEditar() {
+    navigation.navigate("EditarUsuario");
+  }
 
   useFocusEffect(
     React.useCallback(() => {
@@ -130,7 +134,7 @@ export default function PerfilScreen({ navigation }) {
           <View style={{ flex: 1 }}></View>
         </View>
       </View>
-      <CustomButton title="Editar" onPress={"irTabs"} />
+      <CustomButton title="Editar" onPress={irAEditar} />
       <ButtonPrymary text={"Ver tarjetas"} onPress={irATarjetas} />
     </ScrollView>
   );
