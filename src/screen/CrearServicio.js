@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import MapView, { Marker } from 'react-native-maps';
+import React, { useState } from 'react';
 import {
 	View,
 	Text,
@@ -12,268 +11,53 @@ import {
 	Image,
 	Keyboard,
 } from 'react-native';
-import CustomHeader from '../components/CustomHeader';
-import * as ImagePicker from 'expo-image-picker';
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-import AwesomeAlert from 'react-native-awesome-alerts';
-import { storage } from '../utils/firebaseConfig';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import axios from 'axios';
-import { colors } from '../styles/colors';
-import {
-	getUserData,
-	getUserToken,
-	saveUserData,
-	clearUserData,
-} from '../utils/sessionStorage';
+``;import CustomHeader from '../components/CustomHeader';
 
 const windowHeight = Dimensions.get('window').height;
 
-const CrearServicio = (props) => {
-	const { navigation } = props;
-	const [token, setToken] = useState('');
-	const [responseExitoso, setResponseExitoso] = useState(false);
+const CrearServcio = () => {
+	const [error, setError] = useState(false);
+	const [telefono, setTelefono] = useState('');
+	const [telefonoValido, setTelefonoValido] = useState(true);
 
-	const [fileBlob, setFileBlob] = useState('');
-	const [fileName, setFileName] = useState('');
-	const [imageUri, setImageUri] = useState('');
-	const [nameError, setNameError] = useState('');
-
-	//Alert dialog
-	const [showAlert, setShowAlert] = useState(false);
-	const [showAlertProgress, setShowAlertProgress] = useState(false);
-	const [showButton, setShowButton] = useState(false);
-	const [showAlertTittle, setShowAlertTittle] = useState('');
-	const [showAlertMessage, setShowAlertMessage] = useState('');
-
-	const [descripcionServicio, setDescripcionServicio] = useState('');
-	const [tamano, setTamano] = useState('');
-	const [plantas, setPlantas] = useState('');
-	const [ofertaCliente, setOfertaCliente] = useState('');
-	const [direccion, setDireccion] = useState('');
-	const [lat, setLat] = useState('');
-	const [long, setLong] = useState('');
-
-	const [mapRegion, setMapRegion] = useState(null); // Establecemos el estado inicial como null
-	useEffect(() => {
-		const loadToken = async () => {
-			const userToken = await getUserToken();
-			//console.log(userToken);
-			setToken(userToken);
-		};
-
-		loadToken();
-	}, []);
-
-	const validateFields = () => {
-		let isValid = true;
-
-		// Validar descripcionServicio
-		if (!descripcionServicio) {
-			setNameError('Por favor ingrese la descripcion del Servicio');
-			isValid = false;
-		} else {
-			setNameError('');
-		}
-
-		// Validar tamano del inmueble
-		if (!tamano) {
-			setNameError('Por favor ingrese el tamano del inmueble');
-			isValid = false;
-		} else {
-			setNameError('');
-		}
-
-		// Validar las plantas del inmueble
-		if (!plantas) {
-			setNameError('Por favor ingrese las plantas del inmueble');
-			isValid = false;
-		} else {
-			setNameError('');
-		}
-
-		// Validar tamano del inmueble
-		if (!ofertaCliente) {
-			setNameError('Por favor ingrese el tamano del inmueble');
-			isValid = false;
-		} else {
-			setNameError('');
-		}
-
-		// Validar lat
-		if (!lat) {
-			setNameError('Por favor ingrese una ubicación');
-			isValid = false;
-		} else {
-			setNameError('');
-		}
-
-		return isValid;
+	const [nombreServicio, setNombreServicio] = useState('');
+	const [detalles, setDetalles] = useState('');
+	const [personasRequeridas, setPersonasRequeridas] = useState('');
+	// const [nombreServicioValido, setNombreServicioValido] = useState(true);
+	// const [detallesValidos, setDetallesValidos] = useState(true);
+	// const [personasRequeridasValidas, setPersonasRequeridasValidas] =
+	useState(true);
+	const validarTel = () => {
+		// Expresión regular para validar el telefono
+		const regexCodigo = /^\d{9}$/;
+		setTelefonoValido(regexCodigo.test(telefono));
 	};
 
-	function uriToBlob(uri) {
-		return new Promise((resolve, reject) => {
-			const xhr = new XMLHttpRequest();
+	const handleEnviar = () => {
+		// Verificar si todos los campos tienen contenido
+		const todosLosCamposLlenos =
+			nombreServicio.trim() !== '' &&
+			detalles.trim() !== '' &&
+			personasRequeridas.trim() !== '' &&
+			telefono.trim() !== '';
 
-			xhr.onload = function () {
-				resolve(xhr.response);
-			};
-
-			xhr.onerror = function () {
-				reject(new Error('uriToBlob failed'));
-			};
-
-			xhr.responseType = 'blob';
-			xhr.open('GET', uri, true);
-			xhr.send(null);
-		});
-	}
-
-	const handleChooseImage = async () => {
-		const { status } =
-			await ImagePicker.requestMediaLibraryPermissionsAsync();
-		if (status !== 'granted') {
-			console.log('Permission denied');
-			return;
-		}
-		const result = await ImagePicker.launchImageLibraryAsync({
-			mediaTypes: ImagePicker.MediaTypeOptions.Images,
-			allowsEditing: true,
-			aspect: [4, 3],
-			quality: 1,
-		});
-		if (!result.canceled) {
-			const fileUri = result.assets[0].uri;
-			const fileName = fileUri.substring(fileUri.lastIndexOf('/') + 1);
-
-			try {
-				// Convertir la URI a un Blob utilizando la función uriToBlob
-				const fileBlob = await uriToBlob(fileUri);
-
-				// Mostrar la imagen seleccionada sin subirla a Firebase Storage
-				setImageUri(fileUri);
-
-				// Guardar el Blob y el nombre del archivo en variables para subirlos posteriormente
-				setFileBlob(fileBlob);
-				setFileName(fileName);
-			} catch (error) {
-				console.error('Error al leer el archivo:', error);
-			}
+		if (
+			todosLosCamposLlenos &&
+			//nombreServicioValido &&
+			//detallesValidos &&
+			//personasRequeridasValidas //&&
+			telefonoValido
+		) {
+			setError(false);
+			// Realizar la acción de envío aquí, ya que todos los campos están llenos y son válidos
+			console.log('Formulario válido. Enviar la información:', {
+				nombreServicio,
+				detalles,
+				personasRequeridas,
+				telefono,
+			});
 		} else {
-			console.log(result);
-		}
-	};
-
-	// Función para subir la imagen a Firebase Storage y actualizar el enlace en el servidor
-	const handleUploadImage = async () => {
-		try {
-			// Verificar si hay una imagen seleccionada para subir
-			if (fileBlob && fileName) {
-				// Crear una referencia al archivo en Firebase Storage
-				const filePath = `servicios/${fileName}`;
-				const storageRef = ref(storage, filePath);
-
-				// Subir el blob al Firebase Storage
-				const uploadTask = uploadBytesResumable(storageRef, fileBlob);
-
-				uploadTask.on(
-					'state_changed',
-					(snapshot) => {
-						// Observar eventos de cambio de estado como progreso, pausa y reanudación
-						// Obtener el progreso de la tarea, incluyendo el número de bytes subidos y el número total de bytes a subir
-						const progress =
-							(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-						console.log('Upload is ' + progress + '% done');
-						switch (snapshot.state) {
-							case 'paused':
-								console.log('Upload is paused');
-								break;
-							case 'running':
-								console.log('Upload is running');
-								break;
-						}
-					},
-					(error) => {
-						// Manejar errores de subida fallida
-						console.error('Error al subir la imagen:', error);
-					},
-					() => {
-						// Manejar subida exitosa en la finalización
-						// Por ejemplo, obtener la URL de descarga: https://firebasestorage.googleapis.com/...
-						getDownloadURL(uploadTask.snapshot.ref).then(
-							(downloadURL) => {
-								console.log('File available at', downloadURL);
-
-								// Actualizar la URL de la imagen en tu estado
-								setImageUri(downloadURL);
-
-								// Llamar a handleregister con la nueva imagen
-								handleregister(downloadURL);
-							}
-						);
-					}
-				);
-			} else {
-				console.log('falta foto');
-			}
-		} catch (error) {
-			console.error('Error al subir la imagen:', error);
-		}
-	};
-
-	const handleregister = async (imageURL) => {
-		const isValid = validateFields();
-		if (isValid) {
-			setShowAlert(!showAlert);
-			setShowAlertProgress(!showAlertProgress);
-			setShowButton(false);
-			setShowAlertTittle('Subiendo servicio');
-			setShowAlertMessage('Por favor espera...');
-
-			try {
-				// Segunda petición: Guardar datos del servicio en tu API
-				const servicioData = {
-					cliente: { userId: 4 },
-					descripcionServicio: descripcionServicio,
-					tamanoInmueble: tamano,
-					plantas: plantas,
-					ofertaCliente: ofertaCliente,
-					ofertaAceptada: null,
-					fechaServicio: new Date().toLocaleTimeString,
-					horaInicio: null,
-					horaFin: null,
-					latitud: lat,
-					longitud: long,
-					estado: 0,
-					urlImagen_servicio: imageURL,
-				};
-
-				const apiResponse = await axios.post(
-					'http://192.168.0.7:8080/api/servicios',
-					servicioData,
-					{
-						headers: {
-							Authorization: `Bearer ${token}`, // Reemplaza 'token' con tu variable que contiene el token
-						},
-					}
-				);
-
-				// Aquí puedes manejar la respuesta de tu API según tus necesidades
-				console.log(apiResponse.data); // O cualquier otra acción que desees realizar
-
-				setShowAlertProgress(false);
-				setShowButton(true);
-				setShowAlertTittle('Éxito en el guardado');
-				setShowAlertMessage('Se han guardado tus datos correctamente');
-				setResponseExitoso(true);
-			} catch (error) {
-				console.error(error);
-				setShowAlertProgress(false);
-				setShowButton(true);
-				setShowAlertTittle('Error en el guardado');
-				setShowAlertMessage('Inténtelo más tarde');
-			}
-		} else {
+			setError(true);
 			console.log(
 				'Debes completar todos los campos antes de enviar el formulario o hay campos inválidos.'
 			);
@@ -286,177 +70,103 @@ const CrearServicio = (props) => {
 			style={styles.imageBackground}
 			resizeMode='cover'
 		>
+			{/* Cortina de color con opacidad */}
 			<View style={styles.overlay} />
-			<CustomHeader />
+			<CustomHeader/>
 			<View style={styles.containerT}>
+				{/* Contenedor para el texto title */}
 				<View style={styles.titleContainer}>
 					<Text style={styles.textTitle}>Crear Servicio</Text>
 				</View>
+
+				{/* Texto subtitle */}
 				<View style={styles.containerS}>
 					<Text style={styles.textSubtitle}>
 						Para crear tu servicio rellena el formulario
 					</Text>
 				</View>
-				<ScrollView
-					style={styles.scroll}
-					keyboardShouldPersistTaps='handled'
-				>
-					<Text style={styles.textCodigo}>Descripción del servicio</Text>
-					<TextInput
-						placeholder='Descripción del servicio'
-						style={[styles.inputText]}
-						autoCapitalize='none'
-						onChangeText={(text) => {
-							setDescripcionServicio(text);
-						}}
-					/>
-					<Text style={styles.textCodigo}>Tamaño del inmueble</Text>
-					<TextInput
-						placeholder='90m2'
-						style={[styles.inputText]}
-						autoCapitalize='none'
-						//keyboardType='default'
-						onChangeText={(text) => {
-							setTamano(text);
-						}}
-					/>
-					<Text style={styles.textCodigo}>Plantas</Text>
-					<TextInput
-						placeholder='3 plantas'
-						style={[styles.inputTextDetalle]}
-						autoCapitalize='none'
-						onChangeText={(text) => {
-							setPlantas(text);
-						}}
-					/>
-					<Text style={styles.textCodigo}>Oferta del pago</Text>
-					<TextInput
-						placeholder='$3000'
-						style={[styles.inputText]}
-						autoCapitalize='none'
-						keyboardType='numeric'
-						onChangeText={(text) => {
-							setOfertaCliente(text);
-						}}
-					/>
-					<Text style={styles.textCodigo}>Dirección</Text>
-					<View>
-						<GooglePlacesAutocomplete
-							placeholder='Dirección'
-							onPress={(data, details = null) => {
-								const { lat, lng } = details.geometry.location;
-								console.log('Latitud:', lat);
-								console.log('Longitud:', lng);
-								console.log(data.description);
-								setLat(lat);
-								setLong(lng);
-								setDireccion(data.description);
 
-								// Aquí se actualiza mapRegion con la nueva ubicación seleccionada
-								setMapRegion({
-									latitude: parseFloat(lat),
-									longitude: parseFloat(lng),
-									latitudeDelta: 0.022,
-									longitudeDelta: 0.022,
-								});
+				{/* Contenedor para el texto Código y botón */}
+				<View style={styles.codigoContainer}>
+					<ScrollView contentContainerStyle={styles.scroll}>
+						<Text style={styles.textCodigo}>Nombre del servicio</Text>
+						<TextInput
+							placeholder='Nombre del servicio'
+							style={[styles.inputText]}
+							autoCapitalize='none'
+							onChangeText={(text) => {
+								setNombreServicio(text);
 							}}
-							query={{
-								key: 'AIzaSyBhwh4Asc15hyRD-a6WmVXLCva6KUfg27s', // Reemplaza con tu clave de API de Google
-								language: 'es', // Opcional, define el idioma de los resultados
-								components: 'country:mx', // Restringe los resultados a México (código ISO 3166-1 alfa-2 para México)
-							}}
-							styles={{
-								container: { flex: 0 },
-								textInput: styles.inputText,
-								listView: { backgroundColor: '#F8F8F8' },
-								separator: { backgroundColor: '#E6303C' },
-							}}
-							fetchDetails
-							currentLocation={false}
 						/>
-					</View>
-					{lat !== '' && long !== '' ? (
-						<View style={styles.containerMap}>
-							<MapView
-								style={styles.map}
-								region={mapRegion} // Usamos el estado mapRegion para establecer la región del mapa
-								onRegionChange={(region) => setMapRegion(region)} // Actualizamos el estado mapRegion cuando cambia la región del mapa
-							>
-								<Marker
-									coordinate={{
-										latitude: parseFloat(lat),
-										longitude: parseFloat(long),
-									}}
-									title='Ubicación seleccionada'
-									description={direccion}
-								/>
-							</MapView>
-						</View>
-					) : null}
+						<Text style={styles.textCodigo}>Teléfono</Text>
+						<TextInput
+							placeholder='4426690750'
+							style={[styles.inputText]}
+							autoCapitalize='none'
+							keyboardType='numeric'
+							onChangeText={(text) => {
+								setTelefono(text);
+								validarTel(text);
+							}}
+							onSubmitEditing={() => {
+								// Aquí puedes agregar alguna lógica adicional si es necesario
+								Keyboard.dismiss(); // Esto cerrará el teclado automáticamente
+							}}
+						/>
+						<Text style={styles.textCodigo}>Detalles</Text>
+						<TextInput
+							placeholder='Detalles'
+							style={[styles.inputTextDetalle]}
+							autoCapitalize='none'
+							onChangeText={(text) => {
+								setDetalles(text);
+							}}
+						/>
+						<Text style={styles.textCodigo}>Personas requeridas</Text>
+						<TextInput
+							placeholder='Personas requeridas'
+							style={[styles.inputText]}
+							autoCapitalize='none'
+							keyboardType='numeric'
+							onChangeText={(text) => {
+								setPersonasRequeridas(text);
+							}}
+						/>
+						<Text style={styles.textCodigo}>Ubicación</Text>
+						<Image
+							source={require('../../src/assets/images/Ubicacion.png')}
+							style={styles.image}
+						/>
+						<Text style={styles.textCodigo}>Foto</Text>
+						<Image
+							source={require('../../src/assets/images/casa.png')}
+							style={styles.image}
+						/>
+						{error && (
+							<Text style={styles.errorText}>Revisa los campos</Text>
+						)}
 
-					{imageUri ? (
-						<Image source={{ uri: imageUri }} style={styles.image} />
-					) : null}
-					<TouchableOpacity
-						onPress={handleChooseImage}
-						style={styles.button}
-					>
-						<Text style={styles.buttonText}>Seleccionar Imagen</Text>
-					</TouchableOpacity>
-
-					{nameError && (
-						<Text style={styles.errorText}>Revisa los campos</Text>
-					)}
-					<TouchableOpacity
-						style={styles.button}
-						onPress={handleUploadImage}
-					>
-						<Text style={styles.buttonText}>Crear Servicio</Text>
-					</TouchableOpacity>
-					{/* Espacio en blanco */}
-					<View style={styles.bottomSpace} />
-				</ScrollView>
+						<TouchableOpacity
+							style={styles.button}
+							onPress={handleEnviar}
+						>
+							<Text style={styles.buttonText}>Enviar</Text>
+						</TouchableOpacity>
+					</ScrollView>
+				</View>
 			</View>
-
-			<AwesomeAlert
-				show={showAlert}
-				title={showAlertTittle}
-				message={showAlertMessage}
-				showProgress={showAlertProgress}
-				progressColor={colors.primary}
-				progressSize={40}
-				closeOnHardwareBackPress={true}
-				closeOnTouchOutside={false}
-				showConfirmButton={showButton}
-				confirmText='Aceptar'
-				onConfirmPressed={() => {
-					setShowAlert(false);
-					if (responseExitoso) {
-						navigation.navigate('home');
-					}
-				}}
-				confirmButtonStyle={{
-					backgroundColor: colors.blue,
-					width: 100,
-					alignItems: 'center',
-					borderRadius: 30,
-				}}
-				contentContainerStyle={{ borderRadius: 30, marginHorizontal: 50 }}
-			/>
 		</ImageBackground>
 	);
 };
 
 const styles = StyleSheet.create({
+	image: { width: 350 },
+	scroll: {
+		flexGrow: 1,
+		width: '100%', // Asegura que el contenido ocupe todo el ancho del ScrollView
+	},
 	imageBackground: {
 		flexGrow: 1,
-	},
-	scroll: {
-		flex: 1,
-		backgroundColor: '#fff',
-		borderRadius: 20,
-		width: '100%',
-		padding: 20,
 	},
 	overlay: {
 		...StyleSheet.absoluteFillObject,
@@ -466,18 +176,18 @@ const styles = StyleSheet.create({
 		flexGrow: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
-		marginTop: windowHeight * 0.2,
+		marginTop: windowHeight * 0.2, // Ajusta la posición vertical del título
 	},
 	containerS: {
 		width: 300,
 		justifyContent: 'center',
 		alignItems: 'center',
-		marginTop: -50,
+		marginTop: -50, // Ajusta el margen superior del texto subtitle
 		paddingBottom: 20,
 	},
 	titleContainer: {
 		position: 'absolute',
-		top: windowHeight * -0.15,
+		top: windowHeight * -0.15, // Ajusta la posición vertical del título
 		justifyContent: 'center',
 		alignItems: 'center',
 	},
@@ -493,6 +203,14 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 		textAlign: 'center',
 	},
+	codigoContainer: {
+		flexGrow: 1, // Ocupa el espacio restante vertical
+		width: '100%',
+		alignItems: 'center',
+		backgroundColor: '#fff',
+		borderRadius: 20,
+		padding: 10,
+	},
 	textCodigo: {
 		fontSize: 16,
 		color: '#E6303C',
@@ -501,7 +219,7 @@ const styles = StyleSheet.create({
 		padding: 2,
 	},
 	button: {
-		width: '100%',
+		width: 350,
 		height: 45,
 		borderRadius: 20,
 		alignItems: 'center',
@@ -522,9 +240,9 @@ const styles = StyleSheet.create({
 		marginTop: 5,
 		marginBottom: 5,
 		paddingStart: 20,
-		borderColor: '#000',
-		borderWidth: 2,
-		width: '100%',
+		borderColor: '#000', // Cambia el color del borde aquí
+		borderWidth: 2, // Asegúrate de especificar el ancho del borde
+		width: 350,
 	},
 	inputTextDetalle: {
 		height: 50,
@@ -533,9 +251,10 @@ const styles = StyleSheet.create({
 		marginTop: 5,
 		marginBottom: 5,
 		paddingStart: 20,
-		borderColor: '#000',
-		borderWidth: 2,
-		width: '100%',
+		borderColor: '#000', // Cambia el color del borde aquí
+		borderWidth: 2, // Asegúrate de especificar el ancho del borde
+		width: 350,
+		//height: 200,
 	},
 	errorText: {
 		color: 'red',
@@ -543,29 +262,6 @@ const styles = StyleSheet.create({
 		marginTop: 5,
 		textAlign: 'center',
 	},
-	map: {
-		width: '100%',
-		height: '100%',
-		borderRadius: 5,
-	},
-	containerMap: {
-		flex: 1,
-		width: '100%',
-		height: 400,
-		alignSelf: 'flex-start',
-		borderRadius: 30,
-		marginTop: 10,
-	},
-	bottomSpace: {
-		marginBottom: 50,
-	},
-	image: {
-		width: 375,
-		height: 300,
-		alignSelf: 'center',
-		marginTop: 20,
-		borderRadius: 10,
-	},
 });
 
-export default CrearServicio;
+export default CrearServcio;
