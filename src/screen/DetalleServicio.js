@@ -5,37 +5,39 @@ import {
 	StyleSheet,
 	Button,
 	ScrollView,
-	TouchableOpacity
+	TouchableOpacity,
 } from 'react-native';
 import React from 'react';
 import MapView from 'react-native-maps';
 import { Entypo } from '@expo/vector-icons';
 import CustomHeader from '../components/CustomHeader';
 
-export default function DetalleServicio({navigation}) {
+export default function DetalleServicio({ route, navigation }) {
+	const { servicios } = route.params;
 
-	
 	function irAChat() {
-		navigation.navigate("Chat");
-	  }
+		navigation.navigate('Chat');
+	}
 
 	return (
 		<ScrollView style={{ flex: 1, backgroundColor: '#fff' }}>
-			<CustomHeader/>
-			<View style={styles.card}>				
+			<CustomHeader />
+			<View style={styles.card}>
 				<Image
 					source={{
-						uri: 'https://ca-times.brightspotcdn.com/dims4/default/570fbde/2147483647/strip/true/crop/4938x2936+0+0/resize/1200x713!/quality/80/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2F90%2F03%2F12089105491898b4bf70102eb77d%2Ffi-hotprop-makowsky-billionaire.jpg',
+						uri: servicios.urlImagenServicio,
 					}}
 					style={styles.imageCasa}
 				/>
 				<View style={{ flex: 1, flexDirection: 'row' }}>
 					<View style={{ flex: 1 }}>
-						<Text style={{ ...styles.textoCasa, fontSize: 18 }}>Col.Centro</Text>
+						<Text style={{ ...styles.textoCasa, fontSize: 18 }}>
+							{servicios.descripcionServicio}
+						</Text>
 						<Text style={styles.textoCasa}>Servicio empresarial </Text>
-						<Text style={styles.textoCasa}>400 m2 </Text>
+						<Text style={styles.textoCasa}>{servicios.tamanoInmueble} </Text>
 					</View>
-					
+
 					<View style={{ flex: 0.5, marginTop: 24, marginLeft: 5 }}>
 						<Entypo name='location-pin' size={28} color='blue' />
 					</View>
@@ -44,20 +46,33 @@ export default function DetalleServicio({navigation}) {
 			<View style={styles.contenedor}>
 				<Image
 					source={{
-						uri: 'https://pbs.twimg.com/profile_images/1374611344712929280/WwOf-3tQ_400x400.jpg',
+						uri: servicios.cliente.fotoPerfil,
 					}}
 					style={styles.imageDetalle}
 				/>
-				<Text style={{ ...styles.texto, fontSize: 22 }}>Mari Sánchez </Text>
-				<Text style={{ ...styles.texto, fontSize: 22, alignSelf: 'flex-start', left: 10 }}>Ubicación </Text>
+				<Text style={{ ...styles.texto, fontSize: 22 }}>
+					{servicios.cliente.nombreCompleto}{' '}
+				</Text>
+				<Text
+					style={{
+						...styles.texto,
+						fontSize: 22,
+						alignSelf: 'flex-start',
+						left: 10,
+					}}
+				>
+					Ubicación{' '}
+				</Text>
 			</View>
 			<View style={styles.container}>
-			<MapView style={styles.map} />
+				<MapView style={styles.map} />
 			</View>
 			<View style={{ flex: 1, flexDirection: 'row' }}>
 				<View style={styles.containerBotones}>
 					<TouchableOpacity style={styles.button}>
-						<Text style={styles.buttonText}>Aceptar $1500 </Text>
+						<Text style={styles.buttonText}>
+							Aceptar {servicios.ofertaCliente}{' '}
+						</Text>
 					</TouchableOpacity>
 				</View>
 				<View style={styles.containerBotones}>
@@ -76,9 +91,9 @@ export default function DetalleServicio({navigation}) {
 }
 const styles = StyleSheet.create({
 	containerBotones: {
-		flex: 1, 
-		marginTop: 24, 
-		alignItems: 'center'
+		flex: 1,
+		marginTop: 24,
+		alignItems: 'center',
 	},
 	button: {
 		height: 60,
@@ -101,12 +116,12 @@ const styles = StyleSheet.create({
 		width: '90%',
 		height: 200,
 		alignSelf: 'center',
-		borderRadius: 30
-	  },
+		borderRadius: 30,
+	},
 	map: {
 		width: '100%',
 		height: '100%',
-	  },
+	},
 	imageDetalle: {
 		width: 175,
 		height: 175,
