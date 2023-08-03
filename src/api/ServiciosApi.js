@@ -14,10 +14,10 @@ export default function ServiciosApi({ navigation }) {
 			const fetchData = async () => {
 				try {
 					const response = await axios.get(
-						'http://192.168.100.6:8080/api/servicios',
+						'http://192.168.0.7:8080/api/servicios',
 						{
 							headers: {
-								Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbnNpdG8xQGV4YW1wbGUuY29tIiwiaWF0IjoxNjkxMDM5NTI0LCJleHAiOjE2OTExMjU5MjR9.gbWvFu4sEdu2qRM0s4DKX9AtD9wWOxGFVFbfWLTZ8UE`, // Reemplaza 'token' con tu variable que contiene el token
+								Authorization:  `Bearer ${token}`, // Reemplaza 'token' con tu variable que contiene el token
 							},
 						}
 					);

@@ -8,8 +8,13 @@ import {
 } from 'react-native';
 import React, { useRef, useState } from 'react';
 import ServiciosCard from './ServiciosCard';
-export default function ServiciosList(props) {
+import CustomButton from '../components/CustomButton';
+
+export default function ServiciosList({ props, navigation }) {
 	const { servicios } = props;
+	function irACrearServicio() {
+		navigation.navigate('CrearServicio');
+	}
 
 	return (
 		<SafeAreaView>
@@ -25,6 +30,10 @@ export default function ServiciosList(props) {
 					{' '}
 					Mis Solicitudes
 				</Text>
+				<CustomButton
+					title={'Crear Solicitud'}
+					onPress={irACrearServicio}
+				/>
 			</View>
 			<FlatList
 				data={servicios}
@@ -32,7 +41,7 @@ export default function ServiciosList(props) {
 				showsVerticalScrollIndicator={false}
 				showsHorizontalScrollIndicator={false}
 				keyExtractor={(character) => String(character.id)}
-				renderItem={({ item, index }) => <ServiciosCard servicios={item} />}
+				renderItem={({ item, index }) => <ServiciosCard />}
 				contentContainerStyle={styles.container}
 				onEndReachedThreshold={0.2}
 			/>
