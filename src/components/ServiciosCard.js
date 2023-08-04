@@ -30,9 +30,11 @@ export default function ServiciosCard(props) {
 				<View style={{ flex: 1, flexDirection: 'row' }}>
 					<View style={{ flex: 1 }}>
 						<Text style={{ ...styles.texto, fontSize: 20 }}>
-							{servicios.cliente.curp}
+							{servicios.direccion}
 						</Text>
-						<Text style={styles.texto}>{servicios.descripcionServicio} </Text>
+						<Text style={styles.texto}>
+							{servicios.descripcionServicio}{' '}
+						</Text>
 						<Text style={styles.texto}>{servicios.plantas} </Text>
 					</View>
 					<View style={{ flex: 1 }}>

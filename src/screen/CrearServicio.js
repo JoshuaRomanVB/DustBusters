@@ -244,8 +244,9 @@ const CrearServicio = (props) => {
 					horaFin: null,
 					latitud: lat,
 					longitud: long,
+					direccion: direccion,
 					estado: 0,
-					url_imagen_servicio: "sadfgsdaf",
+					urlImagenServicio: imageURL,
 				};
 
 				const apiResponse = await axios.post(
@@ -347,10 +348,11 @@ const CrearServicio = (props) => {
 								const { lat, lng } = details.geometry.location;
 								console.log('Latitud:', lat);
 								console.log('Longitud:', lng);
-								console.log(data.description);
+								console.log(data.structured_formatting.main_text);
+								//console.log(data);
 								setLat(lat);
 								setLong(lng);
-								setDireccion(data.description);
+								setDireccion(data.structured_formatting.main_text);
 
 								// Aquí se actualiza mapRegion con la nueva ubicación seleccionada
 								setMapRegion({
