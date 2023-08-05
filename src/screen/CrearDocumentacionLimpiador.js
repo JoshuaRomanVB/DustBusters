@@ -7,11 +7,83 @@ import {
   Image,
   ImageBackground,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import ButtonLogin from "../components/ButtonCrear";
 import BotonDocumentos from "../components/BotonDocumentos";
+import * as DocumentPicker from 'expo-document-picker';
 
-export default function CrearDocumentacionLimpiador(props) {
+export default function CrearDocumentacionLimpiador({ route, navigation }) {
+
+  const [selectedDocsCount, setSelectedDocsCount] = useState(0);
+  const [selectedDocs, setSelectedDocs] = useState({});
+  const defaultButtonTitles = {
+    "INE": "INE",
+    "CARTA ANTECEDENTES NO PENALES": "CARTA ANTECEDENTES NO PENALES",
+    "COMPROBANTE DE DOMICILIO": "COMPROBANTE DE DOMICILIO",
+    "CURP": "CURP",
+  };
+
+  const [fileDocBlob, setFileDocBlob] = useState([]);
+  const [fileDocName, setFileDocName] = useState([]);
+  const [documentUri, setDocumentUri] = useState([]);
+
+  function uriToBlob(uri) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+
+      xhr.onerror = function () {
+        reject(new Error('uriToBlob failed'));
+      };
+
+      xhr.responseType = 'blob';
+      xhr.open('GET', uri, true);
+      xhr.send(null);
+    });
+  }
+
+  const handleChooseDocument = async (title) => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "*/*", // Allow all types of documents. You can specify specific types if needed.
+      });
+
+      if (result.type === "success") {
+        const fileUri = result.uri;
+        const fileDocName = fileUri.substring(fileUri.lastIndexOf("/") + 1);
+
+        // Convertir la URI a un Blob utilizando la función uriToBlob
+        const fileDocBlob = await uriToBlob(fileUri);
+
+        // Agregar el objeto de documento al array de documentos seleccionados
+        setSelectedDocs(prevDocs => ({
+          ...prevDocs,
+          [title]: fileDocName,
+        }));
+
+        setSelectedDocsCount(prevCount => prevCount + 1);
+      } else {
+        console.log("Canceled");
+      }
+    } catch (error) {
+      console.error("Error al leer el archivo:", error);
+    }
+  };
+
+  /////////////////////////////////////
+  function irACrearCuentaFormLimpiador() {
+    navigation.navigate("CrearCuentaFormLimpiador", {
+      fileBlob: route.params.fileBlob,
+      fileName: route.params.fileName,
+      selectedDocs: selectedDocs,
+      fileDocBlob: fileDocBlob,
+      fileDocName: fileDocName,
+    });
+  }
+
   return (
     <View style={styles.mainContainer}>
       <ImageBackground
@@ -20,31 +92,41 @@ export default function CrearDocumentacionLimpiador(props) {
       >
         <View style={styles.overlay}>
           <View style={styles.imageContainer}>
-            <Text style={styles.titleH}>DOCUMENTACÍON</Text>
+            <Text style={styles.titleH}>DOCUMENTACIÓN</Text>
             <Text style={styles.subTitulo}>
               Para poderte registrar como DustBuster sube tu carta de
               antescedentes no penales
             </Text>
           </View>
         </View>
-        <View style={styles.botonI}>
-          <BotonDocumentos title="INE" />
-        </View>
-        <View style={styles.botonC}>
-          <BotonDocumentos title="CARTA ANTECEDENTES NO PENALES" />
-        </View>
-        <View style={styles.botonC2}>
-          <BotonDocumentos title="COMPROBANTE DE DOMICILIO" />
-        </View>
-        <View style={styles.botonC3}>
-          <BotonDocumentos title="CURP" />
-        </View>
+        {selectedDocsCount < 4 && (
+          <>
+            <View style={styles.botonI}>
+              <BotonDocumentos title='INE' onPress={() => handleChooseDocument("INE")} selected={selectedDocs["INE"]} defaultButtonTitles={defaultButtonTitles} />
+            </View>
+            <View style={styles.botonC}>
+              <BotonDocumentos title="CARTA ANTECEDENTES NO PENALES" onPress={() => handleChooseDocument("CARTA ANTECEDENTES NO PENALES")} selected={selectedDocs["CARTA ANTECEDENTES NO PENALES"]} defaultButtonTitles={defaultButtonTitles} />
+            </View>
+            <View style={styles.botonC2}>
+              <BotonDocumentos title="COMPROBANTE DE DOMICILIO" onPress={() => handleChooseDocument("COMPROBANTE DE DOMICILIO")} selected={selectedDocs["COMPROBANTE DE DOMICILIO"]} defaultButtonTitles={defaultButtonTitles} />
+            </View>
+            <View style={styles.botonC3}>
+              <BotonDocumentos title="CURP" onPress={() => handleChooseDocument("CURP")} selected={selectedDocs["CURP"]} defaultButtonTitles={defaultButtonTitles} />
+            </View>
+          </>
+        )}
+        {selectedDocsCount === 4 && (
+        <>
         <View style={styles.containerForm}>
+        <Text style={styles.subTitulo2}>
+              DOCUMENTACIÓN COMPLETADA
+            </Text>
           <ButtonLogin
-            onPress={() => props.navigation.navigate("CrearCuentaForm")}
+            onPress={irACrearCuentaFormLimpiador}
             title="Continuar"
           />
         </View>
+        </> )}
       </ImageBackground>
     </View>
   );
@@ -78,7 +160,7 @@ const styles = StyleSheet.create({
   containerForm: {
     alignItems: "center",
     justifyContent: "center",
-    top: -20,
+    top: -70,
   },
   titulo: {
     fontSize: 70,
@@ -92,6 +174,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 25,
     marginTop: 25,
+  },
+  subTitulo2: {
+    color: "#fff",
+    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 25,
+    marginBottom: 25
   },
   inputText: {
     height: 60,

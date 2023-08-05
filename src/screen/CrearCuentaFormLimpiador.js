@@ -25,8 +25,8 @@ import CustomButton from "../components/CustomButton";
 import axios from "axios";
 import CustomHeader from "../components/CustomHeader";
 
-const CrearCuentaFormScreen = ({ navigation, route }) => {
-  const { fileBlob, fileName } = route.params;
+const CrearCuentaFormLimpiadorScreen = ({ navigation, route }) => {
+  const { fileBlob, fileName, fileDocBlob, fileDocName, selectedDocs } = route.params;
   //Alert dialog
   const [showAlert, setShowAlert] = useState(false);
   const [showAlertProgress, setShowAlertProgress] = useState(false);
@@ -162,6 +162,67 @@ const CrearCuentaFormScreen = ({ navigation, route }) => {
       console.error("Error al subir la imagen:", error);
     }
   };
+  ///////////////////////////////////
+
+  const handleUploadDocuments = async () => {
+    try {
+      // Verificar si hay documentos seleccionados para subir
+      if (Object.keys(selectedDocs).length > 0) {
+        for (const docTitle in selectedDocs) {
+          const fileDocBlob = fileDocBlob[docTitle];
+          const fileDocName = fileDocName[docTitle];
+  
+          if (fileDocBlob && fileDocName) {
+            // Crear una referencia al archivo en Firebase Storage
+            const filePath = `documentos/${fileDocName}`;
+            const storageRef = ref(storage, filePath);
+  
+            // Subir el blob al Firebase Storage
+            const uploadTask = uploadBytesResumable(storageRef, fileDocBlob);
+  
+            await new Promise((resolve, reject) => {
+              uploadTask.on(
+                "state_changed",
+                (snapshot) => {
+                  // Observar eventos de cambio de estado como progreso, pausa y reanudación
+                  // Obtener el progreso de la tarea, incluyendo el número de bytes subidos y el número total de bytes a subir
+                  const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                  console.log(`Upload for ${docTitle} is ${progress}% done`);
+                  switch (snapshot.state) {
+                    case "paused":
+                      console.log(`Upload for ${docTitle} is paused`);
+                      break;
+                    case "running":
+                      console.log(`Upload for ${docTitle} is running`);
+                      break;
+                  }
+                },
+                (error) => {
+                  // Manejar errores de subida fallida
+                  console.error(`Error al subir el documento ${docTitle}:`, error);
+                  reject(error);
+                },
+                () => {
+                  // Manejar subida exitosa en la finalización
+                  // Por ejemplo, obtener la URL de descarga: https://firebasestorage.googleapis.com/...
+                  getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                    console.log(`File ${docTitle} available at`, downloadURL);
+                    // Aquí puedes hacer algo con la URL de descarga si es necesario
+                    resolve(downloadURL);
+                  });
+                }
+              );
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error al subir documentos:", error);
+      throw error;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
 
   const handleregister = async (imageURL) => {
     const isValid = validateFields();
@@ -173,6 +234,7 @@ const CrearCuentaFormScreen = ({ navigation, route }) => {
       setShowAlertMessage("Por favor espera...");
   
       try {
+        const documentUrls = await handleUploadDocuments();
         // Primera petición: Crear usuario en Openpay
         const openpayResponse = await axios.post(
           "https://sandbox-api.openpay.mx/v1/mqmsrg8kqp8emsh76dgj/customers",
@@ -202,7 +264,7 @@ const CrearCuentaFormScreen = ({ navigation, route }) => {
           telefono: telefono,
           curp: "ESSF",
           userIdOpenpay: openpayCustomerId,
-          tipoUsuario: 1,
+          tipoUsuario: 2,
           fotoPerfil: imageURL,
           fechaRegistro: "2023-07-27T12:34:56",
           ultimaSesion: "2023-07-27T15:30:00",
@@ -336,4 +398,4 @@ const CrearCuentaFormScreen = ({ navigation, route }) => {
   );
 };
 
-export default CrearCuentaFormScreen;
+export default CrearCuentaFormLimpiadorScreen;

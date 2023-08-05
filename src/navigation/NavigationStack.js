@@ -14,6 +14,7 @@ import CreateCreditCardsScreen from "../screen/CreateCreditCardsScreen";
 import Calificaciones from "../screen/Calificaciones";
 import CrearServcio from "../screen/CrearServicio";
 import DetalleServicio from "../screen/DetalleServicio";
+import CrearCuentaFormLimpiadorScreen from "../screen/CrearCuentaFormLimpiador";
 import Chat from "../screen/Chat";
 import EditProfileScreen from "../screen/EditProfileScreen";
 
@@ -54,6 +55,11 @@ export default function NavigationAccount() {
       <Stack.Screen
         name="CrearCuentaForm"
         component={CrearCuentaFormScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="CrearCuentaFormLimpiador"
+        component={CrearCuentaFormLimpiadorScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen

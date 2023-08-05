@@ -14,8 +14,7 @@ import CustomHeader from "../components/CustomHeader";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
 import * as ImagePicker from "expo-image-picker";
 
-export default function CrearLimpiadorFoto({navigation}) {
-
+export default function CrearLimpiadorFoto({ navigation }) {
   const [fileBlob, setFileBlob] = useState("");
   const [fileName, setFileName] = useState("");
   const [imageUri, setImageUri] = useState("");
@@ -45,43 +44,40 @@ export default function CrearLimpiadorFoto({navigation}) {
   });
 }
 
-  const handleChooseImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      console.log("Permission denied");
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-    if (!result.canceled) {
-      const fileUri = result.assets[0].uri;
-      const fileName = fileUri.substring(fileUri.lastIndexOf("/") + 1);
-  
-      try {
-        // Convertir la URI a un Blob utilizando la función uriToBlob
-        const fileBlob = await uriToBlob(fileUri);
-  
-        // Mostrar la imagen seleccionada sin subirla a Firebase Storage
-        setImageUri(fileUri);
-  
-        // Guardar el Blob y el nombre del archivo en variables para subirlos posteriormente
-        setFileBlob(fileBlob);
-        setFileName(fileName);
-      } catch (error) {
-        console.error("Error al leer el archivo:", error);
-      }
-    } else {
-      console.log(result);
-    }
-  };
 
-  function irACrearDocumentacionLimpiador() {
-    navigation.navigate("CrearDocumentacionLimpiador");
+const handleChooseImage = async () => {
+  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (status !== "granted") {
+    console.log("Permission denied");
+    return;
   }
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    aspect: [4, 3],
+    quality: 1,
+  });
+  if (!result.canceled) {
+    const fileUri = result.assets[0].uri;
+    const fileName = fileUri.substring(fileUri.lastIndexOf("/") + 1);
+
+    try {
+      // Convertir la URI a un Blob utilizando la función uriToBlob
+      const fileBlob = await uriToBlob(fileUri);
+
+      // Mostrar la imagen seleccionada sin subirla a Firebase Storage
+      setImageUri(fileUri);
+
+      // Guardar el Blob y el nombre del archivo en variables para subirlos posteriormente
+      setFileBlob(fileBlob);
+      setFileName(fileName);
+    } catch (error) {
+      console.error("Error al leer el archivo:", error);
+    }
+  } else {
+    console.log(result);
+  }
+};
 
   return (
     <View style={styles.mainContainer}>

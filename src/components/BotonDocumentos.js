@@ -1,10 +1,10 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import React from "react";
 
-export default function BotonDocumentos({ onPress, title }) {
+export default function BotonDocumentos({ onPress, title, selected, defaultButtonTitles }) {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
-      <Text style={styles.buttonText}>{title}</Text>
+      <Text style={styles.buttonText}>{selected ? title : defaultButtonTitles[title]}</Text>
     </TouchableOpacity>
   );
 }

@@ -76,7 +76,7 @@ export default function LoginForm(props) {
   
       try {
         // Realizar la solicitud de inicio de sesión a la API
-        const response = await axios.post('http://192.168.100.154:8080/api/auth/signin', {
+        const response = await axios.post('http://192.168.100.8:8080/api/auth/signin', {
           correo: email,
           password: password,
         });
