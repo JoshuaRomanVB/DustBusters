@@ -8,7 +8,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 export default function ServiciosCard(props) {
 	const navigation = useNavigation();
 	const { servicios } = props;
-	console.log(servicios);
+	//console.log(servicios);
 
 	function irACrearServicio() {
 		navigation.navigate('CrearServicio');
@@ -37,14 +37,11 @@ export default function ServiciosCard(props) {
 						</Text>
 						<Text style={styles.texto}>{servicios.plantas} </Text>
 					</View>
-					<View style={{ flex: 1 }}>
-						<Text style={styles.textoCalificar}>EDITAR</Text>
-					</View>
-					<View style={{ flex: 0.5, marginTop: 24, marginLeft: 5 }}>
-						<Entypo name='location-pin' size={28} color='blue' />
-					</View>
-					<View style={{ flex: 1 }}>
-						<Text style={styles.textoPagado}>CANCELAR</Text>
+
+					<View style={{ flex: 0.5, marginTop: 0, marginRight: -50 }}>
+						<Text style={styles.textoPagado}>
+							${servicios.ofertaCliente}
+						</Text>
 					</View>
 				</View>
 			</View>
@@ -118,9 +115,10 @@ const styles = StyleSheet.create({
 		marginTop: 30,
 	},
 	image: {
-		width: 300,
+		width: 350,
 		height: 150,
 		borderRadius: 10,
 		marginTop: 20,
+		resizeMode: 'stretch',
 	},
 });

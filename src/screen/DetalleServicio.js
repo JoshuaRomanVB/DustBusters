@@ -7,13 +7,62 @@ import {
 	ScrollView,
 	TouchableOpacity,
 } from 'react-native';
-import React from 'react';
-import MapView from 'react-native-maps';
+import React, { useState, useEffect } from 'react';
+import MapView, { Marker } from 'react-native-maps';
 import { Entypo } from '@expo/vector-icons';
 import CustomHeader from '../components/CustomHeader';
+import AwesomeAlert from 'react-native-awesome-alerts';
+import axios from 'axios';
+import {
+	// getUserData,
+	getUserToken,
+	// saveUserData,
+	// clearUserData,
+} from '../utils/sessionStorage';
+import { BackHandler } from 'react-native';
 
 export default function DetalleServicio({ route, navigation }) {
 	const { servicios } = route.params;
+	const id = servicios.serviceId;
+	const [token, setToken] = useState('');
+
+	useEffect(() => {
+		const loadToken = async () => {
+			const userToken = await getUserToken();
+			console.log('TokenEffectDetalleServcio: ' + userToken);
+			setToken(userToken);
+		};
+
+		loadToken();
+	}, [navigation, route]);
+
+	const [showAlert, setShowAlert] = useState(false);
+
+	const handleEditarClick = () => {
+		navigation.navigate('EditarServicio', { servicio: servicios });
+	};
+
+	const handleCancelarClick = () => {
+		setShowAlert(true);
+	};
+
+	const handleDeleteServicio = async () => {
+		try {
+			const apiResponse = await axios.delete(
+				`http://192.168.0.7:8080/api/servicios/${id}`,
+
+				{
+					headers: {
+						Authorization: `Bearer ${token}`, // Reemplaza 'token' con tu variable que contiene el token
+					},
+				}
+			);
+
+			console.log(apiResponse.data);
+		} catch (error) {
+			console.error('Error al eliminar servicio:', error);
+		}
+	};
 
 	function irAChat() {
 		navigation.navigate('Chat');
@@ -31,15 +80,26 @@ export default function DetalleServicio({ route, navigation }) {
 				/>
 				<View style={{ flex: 1, flexDirection: 'row' }}>
 					<View style={{ flex: 1 }}>
-						<Text style={{ ...styles.textoCasa, fontSize: 18 }}>
-							{servicios.descripcionServicio}
+						<Text style={{ ...styles.texto, fontSize: 20 }}>
+							{servicios.direccion}
 						</Text>
-						<Text style={styles.textoCasa}>Servicio empresarial </Text>
-						<Text style={styles.textoCasa}>{servicios.tamanoInmueble} </Text>
+						<Text style={styles.texto}>
+							{servicios.descripcionServicio}{' '}
+						</Text>
+						<View style={{ flex: 1, flexDirection: 'row' }}>
+							<Text style={styles.texto}>{servicios.plantas} </Text>
+							<Text style={styles.texto}>
+								{'('}
+								{servicios.tamanoInmueble}
+								{')'}
+							</Text>
+						</View>
 					</View>
 
-					<View style={{ flex: 0.5, marginTop: 24, marginLeft: 5 }}>
-						<Entypo name='location-pin' size={28} color='blue' />
+					<View style={{ flex: 0.5, marginTop: 0, marginRight: -50 }}>
+						<Text style={styles.textoPagado}>
+							${servicios.ofertaCliente}
+						</Text>
 					</View>
 				</View>
 			</View>
@@ -65,14 +125,32 @@ export default function DetalleServicio({ route, navigation }) {
 				</Text>
 			</View>
 			<View style={styles.container}>
-				<MapView style={styles.map} />
+				<MapView
+					style={styles.map}
+					initialRegion={{
+						latitude: parseFloat(servicios.latitud),
+						longitude: parseFloat(servicios.longitud),
+						latitudeDelta: 0.0012,
+						longitudeDelta: 0.0012,
+					}}
+				>
+					<Marker
+						coordinate={{
+							latitude: parseFloat(servicios.latitud),
+							longitude: parseFloat(servicios.longitud),
+						}}
+						title='Ubicación seleccionada'
+						description={servicios.direccion}
+					/>
+				</MapView>
 			</View>
 			<View style={{ flex: 1, flexDirection: 'row' }}>
 				<View style={styles.containerBotones}>
-					<TouchableOpacity style={styles.button}>
-						<Text style={styles.buttonText}>
-							Aceptar {servicios.ofertaCliente}{' '}
-						</Text>
+					<TouchableOpacity
+						style={styles.button}
+						onPress={handleEditarClick}
+					>
+						<Text style={styles.buttonText}>Editar</Text>
 					</TouchableOpacity>
 				</View>
 				<View style={styles.containerBotones}>
@@ -81,9 +159,48 @@ export default function DetalleServicio({ route, navigation }) {
 					</TouchableOpacity>
 				</View>
 				<View style={styles.containerBotones}>
-					<TouchableOpacity style={styles.button}>
-						<Text style={styles.buttonText}>Negociar</Text>
+					<TouchableOpacity
+						style={styles.button}
+						onPress={handleCancelarClick}
+					>
+						<Text style={styles.buttonText}>Cancelar</Text>
 					</TouchableOpacity>
+
+					<AwesomeAlert
+						show={showAlert}
+						showProgress={false}
+						title='¿Seguro que quieres cancelar el servicio?'
+						message='Esta acción no se puede deshacer.'
+						closeOnTouchOutside={true}
+						closeOnHardwareBackPress={false}
+						showCancelButton={true}
+						showConfirmButton={true}
+						cancelText='No, mantener servicio'
+						confirmText='Sí, cancelar servicio'
+						confirmButtonColor='red'
+						cancelButtonColor='#F5AE03'
+						titleStyle={{
+							textAlign: 'center', // Alineación centrada
+							fontSize: 18, // Tamaño del texto del título
+							fontWeight: 'bold', // Negrita
+							color: '#000', // Color del texto del título
+						}}
+						messageStyle={{
+							textAlign: 'center', // Alineación centrada para el mensaje
+							fontSize: 14,
+							color: '#000',
+						}}
+						onCancelPressed={() => {
+							setShowAlert(false);
+							// Aquí puedes agregar la lógica para no cancelar el servicio
+						}}
+						onConfirmPressed={() => {
+							setShowAlert(false);
+							// Aquí puedes agregar la lógica para cancelar el servicio
+							handleDeleteServicio();
+							navigation.goBack();
+						}}
+					/>
 				</View>
 			</View>
 		</ScrollView>
@@ -121,6 +238,7 @@ const styles = StyleSheet.create({
 	map: {
 		width: '100%',
 		height: '100%',
+		borderRadius: 10,
 	},
 	imageDetalle: {
 		width: 175,
@@ -142,10 +260,11 @@ const styles = StyleSheet.create({
 		marginTop: 4, // Reducir el margen superior para dar espacio al texto
 	},
 	imageCasa: {
-		width: 300,
+		width: 350,
 		height: 150,
 		borderRadius: 10,
 		marginTop: 20,
+		resizeMode: 'stretch',
 	},
 	card: {
 		flex: 1,
@@ -184,7 +303,7 @@ const styles = StyleSheet.create({
 		fontSize: 15,
 		fontWeight: 'bold',
 		marginLeft: 10,
-		marginTop: 10, // Reducir el margen superior para dar espacio al texto
+		marginTop: 5, // Reducir el margen superior para dar espacio al texto
 	},
 	textoCalificar: {
 		fontSize: 18,

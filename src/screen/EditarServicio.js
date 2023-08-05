@@ -29,10 +29,10 @@ import {
 
 const windowHeight = Dimensions.get('window').height;
 
-const CrearServicio = (props) => {
-	const { navigation } = props;
+const EditarServicio = ({ route, navigation }) => {
+	const { servicio } = route.params;
 	const [token, setToken] = useState('');
-
+	const id = servicio.serviceId;
 	const [responseExitoso, setResponseExitoso] = useState(false);
 
 	const [fileBlob, setFileBlob] = useState('');
@@ -47,21 +47,33 @@ const CrearServicio = (props) => {
 	const [showAlertTittle, setShowAlertTittle] = useState('');
 	const [showAlertMessage, setShowAlertMessage] = useState('');
 
-	const [descripcionServicio, setDescripcionServicio] = useState('');
-	const [tamano, setTamano] = useState('');
-	const [plantas, setPlantas] = useState('');
-	const [ofertaCliente, setOfertaCliente] = useState('');
-	const [direccion, setDireccion] = useState('');
-	const [lat, setLat] = useState('');
-	const [long, setLong] = useState('');
+	const descServicio = servicio.descripcionServicio;
+	const tamInmueble = servicio.tamanoInmueble;
+	const plant = servicio.plantas;
+	const oferta = `${servicio.ofertaCliente}`;
+	const URlImage = servicio.urlImagenServicio;
+	const dire = servicio.direccion;
+	const latitude = servicio.latitud;
+	const longitude = servicio.longitud;
+
+	const [descripcionServicio, setDescripcionServicio] = useState(descServicio);
+	const [tamano, setTamano] = useState(tamInmueble);
+	const [plantas, setPlantas] = useState(plant);
+	const [ofertaCliente, setOfertaCliente] = useState(oferta);
+	const [direccion, setDireccion] = useState(dire);
+	const [lat, setLat] = useState(latitude);
+	const [long, setLong] = useState(longitude);
 
 	const [mapRegion, setMapRegion] = useState(null); // Establecemos el estado inicial como null
 	useEffect(() => {
 		const loadToken = async () => {
 			const userToken = await getUserToken();
 			//console.log(userToken);
+			console.log(servicio);
 			setToken(userToken);
 		};
+
+		setImageUri(URlImage);
 		loadToken();
 	}, []);
 
@@ -214,7 +226,7 @@ const CrearServicio = (props) => {
 					}
 				);
 			} else {
-				console.log('error al subir la imagen');
+				handleregister(URlImage);
 			}
 		} catch (error) {
 			console.error('Error al subir la imagen:', error);
@@ -249,8 +261,8 @@ const CrearServicio = (props) => {
 					urlImagenServicio: imageURL,
 				};
 
-				const apiResponse = await axios.post(
-					`http://192.168.0.7:8080/api/servicios`,
+				const apiResponse = await axios.put(
+					`http://192.168.0.7:8080/api/servicios/${id}`,
 					servicioData,
 					{
 						headers: {
@@ -291,11 +303,11 @@ const CrearServicio = (props) => {
 			<CustomHeader />
 			<View style={styles.containerT}>
 				<View style={styles.titleContainer}>
-					<Text style={styles.textTitle}>Crear Servicio</Text>
+					<Text style={styles.textTitle}>Editar Servicio</Text>
 				</View>
 				<View style={styles.containerS}>
 					<Text style={styles.textSubtitle}>
-						Para crear tu servicio rellena el formulario
+						Para editar tu servicio rellena el formulario
 					</Text>
 				</View>
 				<ScrollView
@@ -305,6 +317,7 @@ const CrearServicio = (props) => {
 					<Text style={styles.textCodigo}>Descripción del servicio</Text>
 					<TextInput
 						placeholder='Descripción del servicio'
+						defaultValue={servicio.descripcionServicio}
 						style={[styles.inputText]}
 						autoCapitalize='none'
 						onChangeText={(text) => {
@@ -314,6 +327,7 @@ const CrearServicio = (props) => {
 					<Text style={styles.textCodigo}>Tamaño del inmueble</Text>
 					<TextInput
 						placeholder='90m2'
+						defaultValue={servicio.tamanoInmueble}
 						style={[styles.inputText]}
 						autoCapitalize='none'
 						//keyboardType='default'
@@ -324,6 +338,7 @@ const CrearServicio = (props) => {
 					<Text style={styles.textCodigo}>Plantas</Text>
 					<TextInput
 						placeholder='3 plantas'
+						defaultValue={servicio.plantas}
 						style={[styles.inputTextDetalle]}
 						autoCapitalize='none'
 						onChangeText={(text) => {
@@ -333,6 +348,7 @@ const CrearServicio = (props) => {
 					<Text style={styles.textCodigo}>Oferta del pago</Text>
 					<TextInput
 						placeholder='$3000'
+						defaultValue={oferta}
 						style={[styles.inputText]}
 						autoCapitalize='none'
 						//skeyboardType='numeric'
@@ -413,7 +429,7 @@ const CrearServicio = (props) => {
 						style={styles.button}
 						onPress={handleUploadImage}
 					>
-						<Text style={styles.buttonText}>Crear Servicio</Text>
+						<Text style={styles.buttonText}>Editar Servicio</Text>
 					</TouchableOpacity>
 					{/* Espacio en blanco */}
 					<View style={styles.bottomSpace} />
@@ -570,4 +586,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default CrearServicio;
+export default EditarServicio;
