@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Alert,
   SafeAreaView,
@@ -16,6 +16,13 @@ import ButtonPrymary from "../components/ButtonPrymary";
 import { colors } from "../styles/colors";
 import AwesomeAlert from "react-native-awesome-alerts";
 import CustomHeader from "../components/CustomHeader";
+import { useFocusEffect } from "@react-navigation/native";
+import {
+  getUserToken,
+  clearUserId,
+  getUserData,
+  clearUserData,
+} from "../utils/sessionStorage";
 
 const CreateCreditCardsScreen = ({ navigation }) => {
   const [dataUser, setDataUser] = useState([]);
@@ -101,6 +108,32 @@ const CreateCreditCardsScreen = ({ navigation }) => {
     return isValid;
   };
 
+
+  const loadProfile = useCallback(async () => {
+    try {
+      const userData = await getUserData();
+      setDataUser(userData)
+
+    } catch (error) {
+      console.log("Error al cargar el perfil:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadProfile();
+    return () => {
+      // aquí puedes cancelar cualquier operación pendiente si es necesario
+    };
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadProfile();
+    }, [])
+  );
+
+
+
   const handleAgregarTarjeta = async (
     nombre,
     numero,
@@ -117,9 +150,10 @@ const CreateCreditCardsScreen = ({ navigation }) => {
       setShowAlertTittle("Guardando tarjeta");
       setShowAlertMessage("Por favor espera...");
 
-      const merchantId = "mk59znmwpr2kggqezblq";
+      const merchantId = "mqmsrg8kqp8emsh76dgj";
 
-      const url = `https://sandbox-api.openpay.mx/v1/mqmsrg8kqp8emsh76dgj/customers/aool8vwlmaqt3eugwqfw/cards`;
+      const url = `https://sandbox-api.openpay.mx/v1/${merchantId}/customers/${dataUser.userIdOpenpay}/cards`;
+
       console.log(
         nombre +
           " " +
@@ -199,7 +233,7 @@ const CreateCreditCardsScreen = ({ navigation }) => {
               onConfirmPressed={() => {
                 setShowAlert(false);
                 if (responseExitoso) {
-                  navigation.navigate("CreditCardsScreen");
+                  navigation.navigate("Tarjetas");
                 }
               }}
               confirmButtonStyle={{

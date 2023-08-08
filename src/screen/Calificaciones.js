@@ -5,137 +5,131 @@ import {
   StyleSheet,
   Button,
   ScrollView,
+  FlatList
 } from "react-native";
 import React from "react";
 import { Entypo } from "@expo/vector-icons";
 import CustomHeader from "../components/CustomHeader";
+import Constants from "expo-constants";
+import {
+  getUserToken,
+  clearUserId,
+  getUserData,
+  clearUserData,
+} from "../utils/sessionStorage";
+import { useFocusEffect } from "@react-navigation/native";
+import StarRating from "../components/StarRating";
+import axios from "axios";
 
 export default function Calificaciones() {
+  const baseUrl = Constants.manifest.extra.baseUrl;
+  const [ratingUser, setRatingUser] = React.useState();
+  const [dataUser, setDataUser] = React.useState({});
+  const [calificaciones, setCalificaciones] = React.useState({});
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadProfile = async () => {
+        try {
+          setDataUser(await getUserData());
+          const userData = await getUserData();
+          const token = await getUserToken();
+
+          if (userData && token) {
+            const url =
+              baseUrl +
+              "/api/calificaciones/calificacion-general/" +
+              userData.userId;
+            const response = await axios.get(url, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+
+            setRatingUser(response.data);
+            console.log(response.data);
+          } else {
+            console.log("El token o los datos del usuario están vacíos.");
+          }
+
+          if (userData && token) {
+            const url =
+              baseUrl +
+              "/api/calificaciones/por-usuario/" +
+              userData.userId;
+            const response = await axios.get(url, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+
+            setCalificaciones(response.data);
+            console.log(response.data);
+          } else {
+            console.log("El token o los datos del usuario están vacíos.");
+          }
+
+        } catch (error) {
+          console.error("Error al cargar el perfil:", error);
+        }
+      };
+
+      loadProfile();
+
+      return () => {
+        // aquí puedes cancelar cualquier operación pendiente si es necesario
+      };
+    }, [])
+  );
+
+
+
+  const renderItem = ({ item }) => (
+    <View style={styles.cardCalificacion}>
+   <StarRating rating={item.calificacion} />
+      <View style={{ flex: 1, flexDirection: 'row' }}>
+        <View style={{ flex: 1 }}>
+          <Image source={{ uri: item.urlImagenCalificador }} style={styles.image3} />
+        </View>
+        <View style={{ flex: 5 }}>
+          <Text style={{ ...styles.texto, fontSize: 22 }}>{item.nombreCalificador}</Text>
+          <Text style={{ ...styles.texto }}>{item.comentario}</Text>
+        </View>
+        <View style={{ flex: 1 }}></View>
+      </View>
+    </View>
+  );
+
+
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
+ 
       <View style={styles.contenedor}>
         <CustomHeader />
         <View style={styles.contenedorT}>
           <Text style={styles.titulo}>CALIFICACIONES</Text>
-          <Image
-            source={{
-              uri: "https://i.ytimg.com/vi/4cupki37ymI/hq2.jpg?sqp=-oaymwEYCOgCEOgCSFryq4qpAwoIARUAAIhC0AEB&rs=AOn4CLA_4Ch1zzt1GB1O6V-uZTsjT6-Ecw",
-            }}
-            style={styles.image}
-          />
+          {dataUser && dataUser.fotoPerfil ? (
+            <Image source={{ uri: dataUser.fotoPerfil }} style={styles.image} />
+          ) : (
+            <Image
+              source={{
+                uri: "https://pbs.twimg.com/profile_images/1374611344712929280/WwOf-3tQ_400x400.jpg",
+              }}
+              style={styles.image}
+            />
+          )}
 
           <Text style={{ ...styles.texto, fontSize: 22 }}>
-            Pedro Hernandez{" "}
+            {dataUser.nombreCompleto}
           </Text>
-          <Image
-            source={{
-              uri: "https://img.freepik.com/vector-premium/imagen-vectorial-cuatro-estrellas-cinco-buen-nivel_541404-75.jpg?w=2000",
-            }}
-            style={styles.image2}
-          />
+          <StarRating rating={ratingUser} />
         </View>
-      </View>
+   
 
-      <View style={styles.cardCalificacion}>
-        <View>
-          <Image
-            source={{
-              uri: "https://img.freepik.com/vector-premium/imagen-vectorial-cuatro-estrellas-cinco-buen-nivel_541404-75.jpg?w=2000",
-            }}
-            style={{ ...styles.image2, width: 100, left: -70, marginTop: -10 }}
-          />
-        </View>
-        <View style={{ flex: 1, flexDirection: "row" }}>
-          <View style={{ flex: 1 }}>
-            <Image
-              source={{
-                uri: "https://i0.wp.com/www.diarlu.com/wp-content/uploads/2019/09/cara-mujer-joven.jpg?resize=500%2C500&ssl=1",
-              }}
-              style={styles.image3}
-            />
-          </View>
-          <View
-            style={{
-              flex: 5,
-            }}
-          >
-            <Text style={{ ...styles.texto, fontSize: 22 }}>
-              Alejandra Martinez
-            </Text>
-            <Text style={{ ...styles.texto }}>
-              Excelente servicio, atento y dedicado
-            </Text>
-          </View>
-          <View style={{ flex: 1 }}></View>
-        </View>
-      </View>
-      <View style={styles.cardCalificacion}>
-        <View>
-          <Image
-            source={{
-              uri: "https://img.freepik.com/vector-premium/imagen-vectorial-cuatro-estrellas-cinco-buen-nivel_541404-75.jpg?w=2000",
-            }}
-            style={{ ...styles.image2, width: 100, left: -70, marginTop: -10 }}
-          />
-        </View>
-        <View style={{ flex: 1, flexDirection: "row" }}>
-          <View style={{ flex: 1 }}>
-            <Image
-              source={{
-                uri: "https://i0.wp.com/www.diarlu.com/wp-content/uploads/2019/09/cara-mujer-joven.jpg?resize=500%2C500&ssl=1",
-              }}
-              style={styles.image3}
-            />
-          </View>
-          <View
-            style={{
-              flex: 5,
-            }}
-          >
-            <Text style={{ ...styles.texto, fontSize: 22 }}>
-              Alejandra Martinez
-            </Text>
-            <Text style={{ ...styles.texto }}>
-              Excelente servicio, atento y dedicado
-            </Text>
-          </View>
-          <View style={{ flex: 1 }}></View>
-        </View>
-      </View>
-      <View style={styles.cardCalificacion}>
-        <View>
-          <Image
-            source={{
-              uri: "https://img.freepik.com/vector-premium/imagen-vectorial-cuatro-estrellas-cinco-buen-nivel_541404-75.jpg?w=2000",
-            }}
-            style={{ ...styles.image2, width: 100, left: -70, marginTop: -10 }}
-          />
-        </View>
-        <View style={{ flex: 1, flexDirection: "row" }}>
-          <View style={{ flex: 1 }}>
-            <Image
-              source={{
-                uri: "https://i0.wp.com/www.diarlu.com/wp-content/uploads/2019/09/cara-mujer-joven.jpg?resize=500%2C500&ssl=1",
-              }}
-              style={styles.image3}
-            />
-          </View>
-          <View
-            style={{
-              flex: 5,
-            }}
-          >
-            <Text style={{ ...styles.texto, fontSize: 22 }}>
-              Alejandra Martinez
-            </Text>
-            <Text style={{ ...styles.texto }}>
-              Excelente servicio, atento y dedicado
-            </Text>
-          </View>
-          <View style={{ flex: 1 }}></View>
-        </View>
-      </View>
-    </ScrollView>
+      <FlatList
+      data={calificaciones}
+      renderItem={renderItem}
+      keyExtractor={item => item.calificacionId} // Assuming you have unique IDs for each item
+    />
+    </View>
   );
 }
 const styles = StyleSheet.create({
@@ -186,10 +180,11 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   image: {
-    width: 100,
-    height: 100,
-    borderRadius: 40,
-    marginTop: 20,
+    width: 150,
+    height: 150,
+    borderRadius: 100,
+    marginTop: 10,
+    marginBottom: 20,
   },
   image2: {
     width: 250,

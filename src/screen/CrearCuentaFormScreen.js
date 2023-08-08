@@ -217,7 +217,7 @@ const CrearCuentaFormScreen = ({ navigation, route }) => {
         };
   
         const apiResponse = await axios.post(
-          "http://192.168.100.8:8080/api/auth/signup",
+          baseUrl +"/api/auth/signup",
           userData
         );
   

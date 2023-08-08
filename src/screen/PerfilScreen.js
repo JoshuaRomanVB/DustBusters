@@ -12,16 +12,20 @@ import { Entypo } from "@expo/vector-icons";
 import CustomButton from "../components/CustomButton";
 import ButtonPrymary from "../components/ButtonPrymary";
 import {
-  getUserId,
+  getUserToken,
   clearUserId,
   getUserData,
   clearUserData,
 } from "../utils/sessionStorage";
 import { useFocusEffect } from "@react-navigation/native";
+import StarRating from "../components/StarRating";
+import axios from 'axios';
+import Constants from 'expo-constants';
 
 export default function PerfilScreen({ navigation }) {
   const [dataUser, setDataUser] = React.useState({});
-
+  const [ratingUser, setRatingUser] = React.useState();
+  const baseUrl = Constants.manifest.extra.baseUrl;
   function irATarjetas() {
     navigation.navigate("Tarjetas");
   }
@@ -29,7 +33,7 @@ export default function PerfilScreen({ navigation }) {
   function irACalificaciones() {
     navigation.navigate("Calificaciones");
   }
-  
+
   function irAEditar() {
     navigation.navigate("EditarUsuario");
   }
@@ -39,18 +43,38 @@ export default function PerfilScreen({ navigation }) {
       const loadProfile = async () => {
         try {
           setDataUser(await getUserData());
+          const userData = await getUserData();
+          const token = await getUserToken();
+  
+          if (userData && token) {
+            const url = baseUrl + '/api/calificaciones/calificacion-general/' + userData.userId;
+            const response = await axios.get(
+              url,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            
+            setRatingUser(response.data);
+            console.log(response.data);
+          } else {
+            console.log('El token o los datos del usuario están vacíos.');
+          }
         } catch (error) {
-          console.log("Error al cargar el perfil:", error);
+          console.error('Error al cargar el perfil:', error);
         }
       };
-
+  
       loadProfile();
-
+  
       return () => {
         // aquí puedes cancelar cualquier operación pendiente si es necesario
       };
     }, [])
   );
+  
 
   const handleLogout = async () => {
     await clearUserId();
@@ -65,12 +89,7 @@ export default function PerfilScreen({ navigation }) {
         {dataUser && dataUser.fotoPerfil ? (
           <Image
             source={{ uri: dataUser.fotoPerfil }}
-            style={{
-              width: 150,
-              height: 150,
-              alignSelf: "center",
-              borderRadius: 90,
-            }}
+            style={styles.image}
           />
         ) : (
           <Image
@@ -82,13 +101,12 @@ export default function PerfilScreen({ navigation }) {
         )}
 
         <CustomButton title={"Cerrar sesion"} onPress={handleLogout} />
-        <Text style={{ ...styles.texto, fontSize: 22 }}>    {dataUser.nombreCompleto} </Text>
-        <Image
-          source={{
-            uri: "https://img.freepik.com/vector-premium/imagen-vectorial-cuatro-estrellas-cinco-buen-nivel_541404-75.jpg?w=2000",
-          }}
-          style={styles.image2}
-        />
+        <Text style={{ ...styles.texto, fontSize: 22 }}>
+    
+          {dataUser.nombreCompleto}
+        </Text>
+        <View></View>
+        <StarRating rating={ratingUser} />
         <TouchableOpacity onPress={irACalificaciones}>
           <Text style={{ ...styles.texto, color: "#dd0000", fontSize: 20 }}>
             Ver calificaciones
@@ -104,7 +122,7 @@ export default function PerfilScreen({ navigation }) {
             }}
           >
             <Text style={{ ...styles.texto, fontSize: 20 }}>
-			{dataUser.correo}
+              {dataUser.correo}
             </Text>
           </View>
           <View style={{ flex: 1 }}></View>
@@ -117,7 +135,10 @@ export default function PerfilScreen({ navigation }) {
               flex: 5,
             }}
           >
-            <Text style={{ ...styles.texto, fontSize: 20 }}>	{dataUser.numeroTelefono}</Text>
+            <Text style={{ ...styles.texto, fontSize: 20 }}>
+              {" "}
+              {dataUser.numeroTelefono}
+            </Text>
           </View>
           <View style={{ flex: 1 }}></View>
         </View>
@@ -181,10 +202,11 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   image: {
-    width: 200,
-    height: 200,
+    width: 150,
+    height: 150,
     borderRadius: 100,
-    marginTop: 20,
+    marginTop: 10,
+    marginBottom:20
   },
   image2: {
     width: 120,
