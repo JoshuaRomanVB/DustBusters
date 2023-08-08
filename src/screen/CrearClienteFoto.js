@@ -13,11 +13,15 @@ import CustomHeader from "../components/CustomHeader";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
 import * as ImagePicker from "expo-image-picker";
+import Constants from 'expo-constants';
+
 
 export default function CrearClienteFoto({ navigation }) {
   const [fileBlob, setFileBlob] = useState("");
   const [fileName, setFileName] = useState("");
   const [imageUri, setImageUri] = useState("");
+  const baseUrl = Constants.manifest.extra.baseUrl;
+
   function irACrearCuentaForm() {
     navigation.navigate("CrearCuentaForm", {
       fileBlob: fileBlob,

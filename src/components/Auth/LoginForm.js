@@ -26,7 +26,7 @@ import {
   saveUserToken,
   getUserData
 } from '../../utils/sessionStorage';
-
+import Constants from 'expo-constants';
 /**
 Componente de formulario de inicio de sesión
 Este componente muestra un formulario de inicio de sesión con campos de correo electrónico y contraseña.
@@ -39,7 +39,8 @@ También maneja la validación del formulario y la autenticación del usuario.
 export default function LoginForm(props) {
   const { navigation } = props;
   const [error, setError] = useState("");
-
+  const baseUrl = Constants.manifest.extra.baseUrl;
+  
   useEffect(() => {
     // Función asincrónica para verificar los datos de usuario almacenados en el AsyncStorage
     const checkUserData = async () => {
@@ -76,7 +77,7 @@ export default function LoginForm(props) {
   
       try {
         // Realizar la solicitud de inicio de sesión a la API
-        const response = await axios.post('http://192.168.0.7:8080/api/auth/signin', {
+        const response = await axios.post(baseUrl + '/api/auth/signin', {
           correo: email,
           password: password,
         });
