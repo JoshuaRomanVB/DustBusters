@@ -27,6 +27,18 @@ export default function CrearDocumentacionLimpiador({ route, navigation }) {
   const [fileDocName, setFileDocName] = useState([]);
   const [documentUri, setDocumentUri] = useState([]);
 
+  const [fileDocBlobAntecedentes, setFileDocBlobAntecedentes] = useState([]);
+  const [fileDocNameAntecedentes, setFileDocNameAntecedentes] = useState([]);
+  const [documentUriAntecedentes, setDocumentUriAntecedentes] = useState([]);
+
+  const [fileDocBlobDomicilio, setFileDocBlobDomicilio] = useState([]);
+  const [fileDocNameDomicilio, setFileDocNameDomicilio] = useState([]);
+  const [documentUriDomicilio, setDocumentUriDomicilio] = useState([]);
+
+  const [fileDocBlobCurp, setFileDocBlobCurp] = useState([]);
+  const [fileDocNameCurp, setFileDocNameCurp] = useState([]);
+  const [documentUriCurp, setDocumentUriCurp] = useState([]);
+
   function uriToBlob(uri) {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -63,9 +75,121 @@ export default function CrearDocumentacionLimpiador({ route, navigation }) {
           ...prevDocs,
           [title]: fileDocName,
         }));
-
         setSelectedDocsCount(prevCount => prevCount + 1);
-      } else {
+        
+      // Mostrar la imagen seleccionada sin subirla a Firebase Storage
+      setDocumentUri(fileUri);
+
+      // Guardar el Blob y el nombre del archivo en variables para subirlos posteriormente
+      setFileDocBlob(fileDocBlob);
+      setFileDocName(fileDocName);
+      } 
+      else {
+        console.log("Canceled");
+      }
+    } catch (error) {
+      console.error("Error al leer el archivo:", error);
+    }
+  };
+
+  const handleChooseDocumentAntecedentes = async (title) => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "*/*", // Allow all types of documents. You can specify specific types if needed.
+      });
+
+      if (result.type === "success") {
+        const fileUri = result.uri;
+        const fileDocNameAntecedentes = fileUri.substring(fileUri.lastIndexOf("/") + 1);
+
+        // Convertir la URI a un Blob utilizando la función uriToBlob
+        const fileDocBlobAntecedentes = await uriToBlob(fileUri);
+
+        // Agregar el objeto de documento al array de documentos seleccionados
+        setSelectedDocs(prevDocs => ({
+          ...prevDocs,
+          [title]: fileDocNameAntecedentes,
+        }));
+        setSelectedDocsCount(prevCount => prevCount + 1);
+        
+      // Mostrar la imagen seleccionada sin subirla a Firebase Storage
+      setDocumentUriAntecedentes(fileUri);
+
+      // Guardar el Blob y el nombre del archivo en variables para subirlos posteriormente
+      setFileDocBlobAntecedentes(fileDocBlobAntecedentes);
+      setFileDocNameAntecedentes(fileDocNameAntecedentes);
+      } 
+      else {
+        console.log("Canceled");
+      }
+    } catch (error) {
+      console.error("Error al leer el archivo:", error);
+    }
+  };
+
+  const handleChooseDocumentDomicilio = async (title) => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "*/*", // Allow all types of documents. You can specify specific types if needed.
+      });
+
+      if (result.type === "success") {
+        const fileUri = result.uri;
+        const fileDocNameDomicilio = fileUri.substring(fileUri.lastIndexOf("/") + 1);
+
+        // Convertir la URI a un Blob utilizando la función uriToBlob
+        const fileDocBlobDomicilio = await uriToBlob(fileUri);
+
+        // Agregar el objeto de documento al array de documentos seleccionados
+        setSelectedDocs(prevDocs => ({
+          ...prevDocs,
+          [title]: fileDocNameDomicilio,
+        }));
+        setSelectedDocsCount(prevCount => prevCount + 1);
+        
+      // Mostrar la imagen seleccionada sin subirla a Firebase Storage
+      setDocumentUriDomicilio(fileUri);
+
+      // Guardar el Blob y el nombre del archivo en variables para subirlos posteriormente
+      setFileDocBlobDomicilio(fileDocBlobDomicilio);
+      setFileDocNameDomicilio(fileDocNameDomicilio);
+      } 
+      else {
+        console.log("Canceled");
+      }
+    } catch (error) {
+      console.error("Error al leer el archivo:", error);
+    }
+  };
+
+  const handleChooseDocumentCurp = async (title) => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "*/*", // Allow all types of documents. You can specify specific types if needed.
+      });
+
+      if (result.type === "success") {
+        const fileUri = result.uri;
+        const fileDocNameCurp = fileUri.substring(fileUri.lastIndexOf("/") + 1);
+
+        // Convertir la URI a un Blob utilizando la función uriToBlob
+        const fileDocBlobCurp = await uriToBlob(fileUri);
+
+        // Agregar el objeto de documento al array de documentos seleccionados
+        setSelectedDocs(prevDocs => ({
+          ...prevDocs,
+          [title]: fileDocNameCurp,
+        }));
+        setSelectedDocsCount(prevCount => prevCount + 1);
+        
+      // Mostrar la imagen seleccionada sin subirla a Firebase Storage
+      setDocumentUriCurp(fileUri);
+
+      // Guardar el Blob y el nombre del archivo en variables para subirlos posteriormente
+      setFileDocBlobCurp(fileDocBlobCurp);
+      setFileDocNameCurp(fileDocNameCurp);
+      } 
+      else {
         console.log("Canceled");
       }
     } catch (error) {
@@ -81,7 +205,25 @@ export default function CrearDocumentacionLimpiador({ route, navigation }) {
       selectedDocs: selectedDocs,
       fileDocBlob: fileDocBlob,
       fileDocName: fileDocName,
+      fileDocBlobAntecedentes: fileDocBlobAntecedentes,
+      fileDocNameAntecedentes: fileDocNameAntecedentes,
+      fileDocBlobDomicilio: fileDocBlobDomicilio,
+      fileDocNameDomicilio: fileDocNameDomicilio,
+      fileDocBlobCurp: fileDocBlobCurp,
+      fileDocNameCurp: fileDocNameCurp
     });
+    console.log("DOC: ",fileDocBlob)
+    console.log("SELECTED: ",selectedDocs)
+    console.log("DOC NAME", fileDocName);
+
+    console.log("CARTA DE ANTECEDENTES: ",fileDocBlobAntecedentes)
+    console.log("DOC NAME ANTECEDENTES", fileDocNameAntecedentes);
+
+    console.log("DOC DOMICILIO: ",fileDocBlobDomicilio)
+    console.log("DOC NAME DOMICILIO", fileDocNameDomicilio);
+
+    console.log("DOC CURP: ",fileDocBlobCurp)
+    console.log("DOC NAME CURP", fileDocNameCurp);
   }
 
   return (
@@ -105,13 +247,13 @@ export default function CrearDocumentacionLimpiador({ route, navigation }) {
               <BotonDocumentos title='INE' onPress={() => handleChooseDocument("INE")} selected={selectedDocs["INE"]} defaultButtonTitles={defaultButtonTitles} />
             </View>
             <View style={styles.botonC}>
-              <BotonDocumentos title="CARTA ANTECEDENTES NO PENALES" onPress={() => handleChooseDocument("CARTA ANTECEDENTES NO PENALES")} selected={selectedDocs["CARTA ANTECEDENTES NO PENALES"]} defaultButtonTitles={defaultButtonTitles} />
+              <BotonDocumentos title="CARTA ANTECEDENTES NO PENALES" onPress={() => handleChooseDocumentAntecedentes("CARTA ANTECEDENTES NO PENALES")} selected={selectedDocs["CARTA ANTECEDENTES NO PENALES"]} defaultButtonTitles={defaultButtonTitles} />
             </View>
             <View style={styles.botonC2}>
-              <BotonDocumentos title="COMPROBANTE DE DOMICILIO" onPress={() => handleChooseDocument("COMPROBANTE DE DOMICILIO")} selected={selectedDocs["COMPROBANTE DE DOMICILIO"]} defaultButtonTitles={defaultButtonTitles} />
+              <BotonDocumentos title="COMPROBANTE DE DOMICILIO" onPress={() => handleChooseDocumentDomicilio("COMPROBANTE DE DOMICILIO")} selected={selectedDocs["COMPROBANTE DE DOMICILIO"]} defaultButtonTitles={defaultButtonTitles} />
             </View>
             <View style={styles.botonC3}>
-              <BotonDocumentos title="CURP" onPress={() => handleChooseDocument("CURP")} selected={selectedDocs["CURP"]} defaultButtonTitles={defaultButtonTitles} />
+              <BotonDocumentos title="CURP" onPress={() => handleChooseDocumentCurp("CURP")} selected={selectedDocs["CURP"]} defaultButtonTitles={defaultButtonTitles} />
             </View>
           </>
         )}

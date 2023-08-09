@@ -49,7 +49,7 @@ export default function DetalleServicio({ route, navigation }) {
 	const handleDeleteServicio = async () => {
 		try {
 			const apiResponse = await axios.delete(
-				`http://192.168.0.7:8080/api/servicios/${id}`,
+				`http://10.13.6.28:8080/api/servicios/${id}`,
 
 				{
 					headers: {

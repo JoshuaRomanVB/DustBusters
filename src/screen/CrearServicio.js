@@ -250,7 +250,7 @@ const CrearServicio = (props) => {
 				};
 
 				const apiResponse = await axios.post(
-					`http://192.168.0.7:8080/api/servicios`,
+					`http://10.13.6.28:8080/api/servicios`,
 					servicioData,
 					{
 						headers: {

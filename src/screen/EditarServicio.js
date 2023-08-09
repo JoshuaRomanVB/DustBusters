@@ -262,7 +262,7 @@ const EditarServicio = ({ route, navigation }) => {
 				};
 
 				const apiResponse = await axios.put(
-					`http://192.168.0.7:8080/api/servicios/${id}`,
+					`http://10.13.6.28:8080/api/servicios/${id}`,
 					servicioData,
 					{
 						headers: {

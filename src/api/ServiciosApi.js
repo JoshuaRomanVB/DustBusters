@@ -14,7 +14,7 @@ export default function ServiciosApi({ navigation }) {
 			const fetchData = async () => {
 				try {
 					const response = await axios.get(
-						'http://192.168.0.7:8080/api/servicios',
+						'http://10.13.6.28:8080/api/servicios',
 						{
 							headers: {
 								Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXN0ZXJpbzM2N0BnbWFpbC5jb20iLCJpYXQiOjE2OTEyMTA2MjQsImV4cCI6MTY5MTI5NzAyNH0.TizWhk3Uh-_aoLAr57qatvMnVuJdvCII-Qmc3BP1gdI`, // Reemplaza 'token' con tu variable que contiene el token
