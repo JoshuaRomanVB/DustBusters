@@ -22,7 +22,7 @@ import axios from 'axios';
 import { colors } from '../styles/colors';
 import Constants from 'expo-constants';
 import {
-	//getUserData,
+	getUserData,
 	getUserToken,
 	// saveUserData,
 	// clearUserData,
@@ -34,6 +34,7 @@ const EditarServicio = ({ route, navigation }) => {
 	const baseUrl = Constants.manifest.extra.baseUrl;
 	const { servicio } = route.params;
 	const [token, setToken] = useState('');
+	const [userId, setUserId] = useState('');
 	const id = servicio.serviceId;
 	const [responseExitoso, setResponseExitoso] = useState(false);
 
@@ -81,9 +82,16 @@ const EditarServicio = ({ route, navigation }) => {
 			//console.log(servicio);
 			setToken(userToken);
 		};
+		const loadUserId = async () => {
+			const userData = await getUserData();
+			const id = userData.authorities[0].userId;
+			//console.log('userDAta: ', userData.authorities[0].userId);
+			setUserId(id);
+		};
 
-		setImageUri(URlImage);
 		loadToken();
+		setImageUri(URlImage);
+		loadUserId();
 	}, []);
 
 	const validateFields = () => {
@@ -254,7 +262,7 @@ const EditarServicio = ({ route, navigation }) => {
 			try {
 				// Segunda petición: Guardar datos del servicio en tu API
 				const servicioData = {
-					cliente: { userId: 1 },
+					cliente: { userId: userId },
 					descripcionServicio: descripcionServicio,
 					tamanoInmueble: tamano,
 					plantas: plantas,

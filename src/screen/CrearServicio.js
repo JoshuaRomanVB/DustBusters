@@ -39,6 +39,7 @@ const CrearServicio = (props) => {
 	const baseUrl = Constants.manifest.extra.baseUrl;
 	const { navigation } = props;
 	const [token, setToken] = useState('');
+	const [userId, setUserId] = useState('');
 
 	const [responseExitoso, setResponseExitoso] = useState(false);
 
@@ -69,6 +70,15 @@ const CrearServicio = (props) => {
 
 			setToken(userToken);
 		};
+
+		const loadUserId = async () => {
+			const userData = await getUserData();
+			const id = userData.authorities[0].userId;
+			//console.log('userDAta: ', userData.authorities[0].userId);
+			setUserId(id);
+		};
+
+		loadUserId();
 		loadToken();
 		console.log('tokenCrearServicio', token);
 	}, []);
@@ -241,7 +251,7 @@ const CrearServicio = (props) => {
 			try {
 				// Segunda petición: Guardar datos del servicio en tu API
 				const servicioData = {
-					cliente: { userId: 1 },
+					cliente: { userId: userId },
 					descripcionServicio: descripcionServicio,
 					tamanoInmueble: tamano,
 					plantas: plantas,
