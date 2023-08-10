@@ -6,12 +6,30 @@ import {
 	StyleSheet,
 	ActivityIndicator,
 } from 'react-native';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ServiciosCard from './ServiciosCard';
 import CustomButton from '../components/CustomButton';
+import {
+	// getUserData,
+	getUserToken,
+	// saveUserData,
+	// clearUserData,
+} from '../utils/sessionStorage';
 export default function ServiciosList(props) {
 	const { servicios } = props;
 	const { navigation } = props;
+	const [token, setToken] = useState('');
+	useEffect(() => {
+		const loadToken = async () => {
+			const userToken = await getUserToken();
+			//console.log('TokenEffectServicioList: ' + userToken);
+			// console.log('lati', servicios.latitud);
+			// console.log('long', servicios.longitud);
+			setToken(userToken);
+		};
+
+		loadToken();
+	}, []);
 	function irACrearServicio() {
 		navigation.navigate('CrearServicio');
 	}

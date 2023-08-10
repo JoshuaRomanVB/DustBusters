@@ -20,6 +20,7 @@ import { storage } from '../utils/firebaseConfig';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import axios from 'axios';
 import { colors } from '../styles/colors';
+import Constants from 'expo-constants';
 import {
 	//getUserData,
 	getUserToken,
@@ -30,10 +31,18 @@ import {
 const windowHeight = Dimensions.get('window').height;
 
 const EditarServicio = ({ route, navigation }) => {
+	const baseUrl = Constants.manifest.extra.baseUrl;
 	const { servicio } = route.params;
 	const [token, setToken] = useState('');
 	const id = servicio.serviceId;
 	const [responseExitoso, setResponseExitoso] = useState(false);
+
+	const defaultRegion = {
+		latitude: servicio.latitud,
+		longitude: servicio.longitud,
+		latitudeDelta: 0.022,
+		longitudeDelta: 0.022,
+	};
 
 	const [fileBlob, setFileBlob] = useState('');
 	const [fileName, setFileName] = useState('');
@@ -64,12 +73,12 @@ const EditarServicio = ({ route, navigation }) => {
 	const [lat, setLat] = useState(latitude);
 	const [long, setLong] = useState(longitude);
 
-	const [mapRegion, setMapRegion] = useState(null); // Establecemos el estado inicial como null
+	const [mapRegion, setMapRegion] = useState(defaultRegion); // Establecemos el estado inicial como null
 	useEffect(() => {
 		const loadToken = async () => {
 			const userToken = await getUserToken();
 			//console.log(userToken);
-			console.log(servicio);
+			//console.log(servicio);
 			setToken(userToken);
 		};
 
@@ -245,7 +254,7 @@ const EditarServicio = ({ route, navigation }) => {
 			try {
 				// Segunda petición: Guardar datos del servicio en tu API
 				const servicioData = {
-					cliente: { userId: 4 },
+					cliente: { userId: 1 },
 					descripcionServicio: descripcionServicio,
 					tamanoInmueble: tamano,
 					plantas: plantas,
@@ -262,7 +271,7 @@ const EditarServicio = ({ route, navigation }) => {
 				};
 
 				const apiResponse = await axios.put(
-					`http://10.13.6.28:8080/api/servicios/${id}`,
+					baseUrl + `/api/servicios/${id}`,
 					servicioData,
 					{
 						headers: {
@@ -362,9 +371,9 @@ const EditarServicio = ({ route, navigation }) => {
 							placeholder='Dirección'
 							onPress={(data, details = null) => {
 								const { lat, lng } = details.geometry.location;
-								console.log('Latitud:', lat);
-								console.log('Longitud:', lng);
-								console.log(data.structured_formatting.main_text);
+								// console.log('Latitud:', lat);
+								// console.log('Longitud:', lng);
+								// console.log(data.structured_formatting.main_text);
 								//console.log(data);
 								setLat(lat);
 								setLong(lng);

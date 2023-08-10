@@ -17,11 +17,17 @@ import * as ImagePicker from 'expo-image-picker';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import AwesomeAlert from 'react-native-awesome-alerts';
 import { storage } from '../utils/firebaseConfig';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import Constants from 'expo-constants';
+import {
+	ref,
+	uploadBytesResumable,
+	getDownloadURL,
+	getStorage,
+} from 'firebase/storage';
 import axios from 'axios';
 import { colors } from '../styles/colors';
 import {
-	//getUserData,
+	getUserData,
 	getUserToken,
 	// saveUserData,
 	// clearUserData,
@@ -30,6 +36,7 @@ import {
 const windowHeight = Dimensions.get('window').height;
 
 const CrearServicio = (props) => {
+	const baseUrl = Constants.manifest.extra.baseUrl;
 	const { navigation } = props;
 	const [token, setToken] = useState('');
 
@@ -59,10 +66,11 @@ const CrearServicio = (props) => {
 	useEffect(() => {
 		const loadToken = async () => {
 			const userToken = await getUserToken();
-			//console.log(userToken);
+
 			setToken(userToken);
 		};
 		loadToken();
+		console.log('tokenCrearServicio', token);
 	}, []);
 
 	const validateFields = () => {
@@ -233,7 +241,7 @@ const CrearServicio = (props) => {
 			try {
 				// Segunda petición: Guardar datos del servicio en tu API
 				const servicioData = {
-					cliente: { userId: 4 },
+					cliente: { userId: 1 },
 					descripcionServicio: descripcionServicio,
 					tamanoInmueble: tamano,
 					plantas: plantas,
@@ -250,11 +258,11 @@ const CrearServicio = (props) => {
 				};
 
 				const apiResponse = await axios.post(
-					`http://10.13.6.28:8080/api/servicios`,
+					baseUrl + `/api/servicios`,
 					servicioData,
 					{
 						headers: {
-							Authorization: `Bearer ${token}`, // Reemplaza 'token' con tu variable que contiene el token
+							Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXN0ZXJpbzM2N0BnbWFpbC5jb20iLCJpYXQiOjE2OTE2MjI0MzcsImV4cCI6MTY5MTcwODgzN30.8k2w0aJxBclBvJxgNJn26pYbLTFPjCU9uzisOdZsQHc`, // Reemplaza 'token' con tu variable que contiene el token
 						},
 					}
 				);

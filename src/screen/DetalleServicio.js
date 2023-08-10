@@ -12,6 +12,7 @@ import MapView, { Marker } from 'react-native-maps';
 import { Entypo } from '@expo/vector-icons';
 import CustomHeader from '../components/CustomHeader';
 import AwesomeAlert from 'react-native-awesome-alerts';
+import Constants from 'expo-constants';
 import axios from 'axios';
 import {
 	// getUserData,
@@ -22,6 +23,7 @@ import {
 import { BackHandler } from 'react-native';
 
 export default function DetalleServicio({ route, navigation }) {
+	const baseUrl = Constants.manifest.extra.baseUrl;
 	const { servicios } = route.params;
 	const id = servicios.serviceId;
 	const [token, setToken] = useState('');
@@ -29,7 +31,9 @@ export default function DetalleServicio({ route, navigation }) {
 	useEffect(() => {
 		const loadToken = async () => {
 			const userToken = await getUserToken();
-			console.log('TokenEffectDetalleServcio: ' + userToken);
+			//console.log('TokenEffectDetalleServcio: ' + userToken);
+			//console.log('latitud', servicios.latitud);
+			//console.log('longitud', servicios.longitud);
 			setToken(userToken);
 		};
 
@@ -49,7 +53,7 @@ export default function DetalleServicio({ route, navigation }) {
 	const handleDeleteServicio = async () => {
 		try {
 			const apiResponse = await axios.delete(
-				`http://10.13.6.28:8080/api/servicios/${id}`,
+				baseUrl + `/api/servicios/${id}`,
 
 				{
 					headers: {
@@ -127,7 +131,7 @@ export default function DetalleServicio({ route, navigation }) {
 			<View style={styles.container}>
 				<MapView
 					style={styles.map}
-					initialRegion={{
+					region={{
 						latitude: parseFloat(servicios.latitud),
 						longitude: parseFloat(servicios.longitud),
 						latitudeDelta: 0.0012,
@@ -144,6 +148,7 @@ export default function DetalleServicio({ route, navigation }) {
 					/>
 				</MapView>
 			</View>
+
 			<View style={{ flex: 1, flexDirection: 'row' }}>
 				<View style={styles.containerBotones}>
 					<TouchableOpacity
