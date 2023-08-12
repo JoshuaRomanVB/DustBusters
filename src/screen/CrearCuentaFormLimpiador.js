@@ -230,6 +230,11 @@ const CrearCuentaFormLimpiadorScreen = ({ navigation, route }) => {
             },
           ],
         };
+
+        const apiResponse = await axios.post(
+					baseUrl + '/api/auth/signup',
+					userData
+				);
         
         // Aquí puedes manejar la respuesta de tu API según tus necesidades
         //console.log(apiResponseDocs); // O cualquier otra acción que desees realizar
