@@ -18,8 +18,8 @@ export default function CrearLimpiadorFoto({ navigation }) {
   const [fileBlob, setFileBlob] = useState("");
   const [fileName, setFileName] = useState("");
   const [imageUri, setImageUri] = useState("");
-  function irACrearDocumentacionLimpiador() {
-    navigation.navigate("CrearDocumentacionLimpiador", {
+  function irACrearCuentaFormLimpiador() {
+    navigation.navigate("CrearCuentaFormLimpiador", {
       fileBlob: fileBlob,
       fileName: fileName,
     });
@@ -120,7 +120,7 @@ const handleChooseImage = async () => {
         </View>
         <View style={styles.containerForm}>
           <ButtonLogin
-            onPress={irACrearDocumentacionLimpiador}
+            onPress={irACrearCuentaFormLimpiador}
             title="Continuar"
           />
         </View>

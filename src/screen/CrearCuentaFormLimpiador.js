@@ -24,12 +24,11 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import CustomButton from "../components/CustomButton";
 import axios from "axios";
 import CustomHeader from "../components/CustomHeader";
+import Constants from 'expo-constants';
 
 const CrearCuentaFormLimpiadorScreen = ({ navigation, route }) => {
-  const { fileBlob, fileName, fileDocBlob, fileDocName, selectedDocs,
-     fileDocBlobAntecedentes, fileDocNameAntecedentes,
-     fileDocBlobDomicilio, fileDocNameDomicilio,
-     fileDocBlobCurp, fileDocNameCurp} = route.params;
+  const baseUrl = Constants.manifest.extra.baseUrl;
+  const { fileBlob, fileName} = route.params;
   //console.log("YA LLEGARON",selectedDocs)
   //console.log("CURP", fileDocBlobCurp);
   //Alert dialog
@@ -117,12 +116,13 @@ const CrearCuentaFormLimpiadorScreen = ({ navigation, route }) => {
     navigation.navigate("TabsClientes");
   }
 
+  
+
   // Función para subir la imagen a Firebase Storage y actualizar el enlace en el servidor
   const handleUploadImage = async () => {
     try {
       // Verificar si hay una imagen seleccionada para subir
-      if (fileBlob && fileName && fileDocBlob && fileDocName && fileDocBlobAntecedentes && fileDocNameAntecedentes
-        && fileDocBlobDomicilio && fileDocNameDomicilio && fileDocBlobCurp && fileDocNameCurp) {
+      if (fileBlob && fileName) {
         // Crear una referencia al archivo en Firebase Storage
         const filePath = `usuariosLimpiador/${fileName}`;
         const storageRef = ref(storage, filePath);
@@ -161,54 +161,11 @@ const CrearCuentaFormLimpiadorScreen = ({ navigation, route }) => {
               setImageUri(downloadURL);
 
               // Llamar a handleregister con la nueva imagen
-              //handleregister(downloadURL);
+              handleregister(downloadURL);
+              
             });
           }
         );
-
-        ////// INE ///////////////////////////////////////7
-        const filePathIne = `usuariosLimpiador/${fileDocName}`;
-        const storageRefIne = ref(storage, filePathIne);
-
-        // Subir el blob al Firebase Storage
-        const uploadTaskIne = uploadBytesResumable(storageRefIne, fileDocBlob);
-
-        uploadTaskIne.on(
-          "state_changed",
-          (snapshot) => {
-            // Observar eventos de cambio de estado como progreso, pausa y reanudación
-            // Obtener el progreso de la tarea, incluyendo el número de bytes subidos y el número total de bytes a subir
-            const progress =
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            console.log("INE is " + progress + "% done");
-            switch (snapshot.state) {
-              case "paused":
-                console.log("Upload is paused");
-                break;
-              case "running":
-                console.log("Upload is running");
-                break;
-            }
-          },
-          (error) => {
-            // Manejar errores de subida fallida
-            console.error("Error al subir la INE:", error);
-          },
-          () => {
-            // Manejar subida exitosa en la finalización
-            // Por ejemplo, obtener la URL de descarga: https://firebasestorage.googleapis.com/...
-            getDownloadURL(uploadTaskIne.snapshot.ref).then((downloadURL) => {
-              console.log("File available at", downloadURL);
-
-              // Actualizar la URL de la imagen en tu estado
-              setIneUri(downloadURL);
-
-              // Llamar a handleregister con la nueva imagen
-              handleregister(ineUri, imageUri);
-            });
-          }
-        );
-
 
       } else {
         handleregister("../assets/images/perfil.png");
@@ -219,95 +176,9 @@ const CrearCuentaFormLimpiadorScreen = ({ navigation, route }) => {
   };
   ///////////////////////////////////
 
-  const handleUploadDocuments = async () => {
-    try {
-      // Verificar si hay documentos seleccionados para subir
-      if (Object.keys(selectedDocs).length > 0) {
-        for (const docTitle in selectedDocs) {
-          const fileDocBlob = fileDocBlob[docTitle];
-          const fileDocName = fileDocName[docTitle];
-  
-          if (fileDocBlob && fileDocName) {
-            // Crear una referencia al archivo en Firebase Storage
-            const filePath = `documentos/${fileDocName}`;
-            const storageRef = ref(storage, filePath);
-  
-            // Subir el blob al Firebase Storage
-            const uploadTask = uploadBytesResumable(storageRef, fileDocBlob);
-  
-            await new Promise((resolve, reject) => {
-              uploadTask.on(
-                "state_changed",
-                (snapshot) => {
-                  // Observar eventos de cambio de estado como progreso, pausa y reanudación
-                  // Obtener el progreso de la tarea, incluyendo el número de bytes subidos y el número total de bytes a subir
-                  const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                  console.log(`Upload for ${docTitle} is ${progress}% done`);
-                  switch (snapshot.state) {
-                    case "paused":
-                      console.log(`Upload for ${docTitle} is paused`);
-                      break;
-                    case "running":
-                      console.log(`Upload for ${docTitle} is running`);
-                      break;
-                  }
-                },
-                (error) => {
-                  // Manejar errores de subida fallida
-                  console.error(`Error al subir el documento ${docTitle}:`, error);
-                  reject(error);
-                },
-                () => {
-                  // Manejar subida exitosa en la finalización
-                  // Por ejemplo, obtener la URL de descarga: https://firebasestorage.googleapis.com/...
-                  getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                    console.log(`File ${docTitle} available at`, downloadURL);
-                    // Aquí puedes hacer algo con la URL de descarga si es necesario
-                    resolve(downloadURL);
-                  });
-                }
-              );
-            });
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error al subir documentos:", error);
-      throw error;
-    }
-  };
-
-  const getDocumentUrls = async () => {
-    try {
-      const documentUrls = {};
-  
-      // Verificar si hay documentos seleccionados para obtener sus URLs
-      if (Object.keys(selectedDocs).length > 0) {
-        for (const docTitle in selectedDocs) {
-          const fileDocName = fileDocName[docTitle];
-          if (fileDocName) {
-            // Crear una referencia al archivo en Firebase Storage
-            const filePath = `documentos/${fileDocName}`;
-            const storageRef = ref(storage, filePath);
-  
-            // Obtener la URL de descarga del documento
-            const downloadURL = await getDownloadURL(storageRef);
-  
-            // Agregar la URL al objeto de documentUrls
-            documentUrls[docTitle] = downloadURL;
-          }
-        }
-      }
-  
-      return documentUrls;
-    } catch (error) {
-      console.error("Error al obtener URLs de descarga:", error);
-      throw error;
-    }
-  };
   ////////////////////////////////////////////////////////////////////////////
 
-  const handleregister = async (imageUri, ineUri) => {
+  const handleregister = async (imageURL) => {
     const isValid = validateFields();
     if (isValid) {
       setShowAlert(!showAlert);
@@ -317,7 +188,6 @@ const CrearCuentaFormLimpiadorScreen = ({ navigation, route }) => {
       setShowAlertMessage("Por favor espera...");
   
       try {
-        const documentUrls = await getDocumentUrls();
         // Primera petición: Crear usuario en Openpay
         const openpayResponse = await axios.post(
           "https://sandbox-api.openpay.mx/v1/mqmsrg8kqp8emsh76dgj/customers",
@@ -348,7 +218,7 @@ const CrearCuentaFormLimpiadorScreen = ({ navigation, route }) => {
           curp: "ESSF",
           userIdOpenpay: openpayCustomerId,
           tipoUsuario: 2,
-          fotoPerfil: imageUri,
+          fotoPerfil: imageURL,
           fechaRegistro: "2023-07-27T12:34:56",
           ultimaSesion: "2023-07-27T15:30:00",
           authorities: [
@@ -360,35 +230,18 @@ const CrearCuentaFormLimpiadorScreen = ({ navigation, route }) => {
             },
           ],
         };
-  
-        const apiResponse = await axios.post(
-          "http://10.13.6.28:8080/api/auth/signup",
-          userData
-        );
-
-        ///////////DOCUMENTOS///////////////7
-        // Segunda petición: Guardar datos del usuario en tu API
-        const docsData = {
-          "nombreDoc": fileDocName,
-          "urlDoc": ineUri,
-          "userId": 3
-        };
-  
-        const apiResponseDocs = await axios.post(
-          "http://10.13.6.28:8080/api/documentos",
-          docsData
-        );
-
-  
+        
         // Aquí puedes manejar la respuesta de tu API según tus necesidades
-        console.log(apiResponse.data); // O cualquier otra acción que desees realizar
-        console.log("YA LLEGO EL INE: ",apiResponseDocs.data);
+        //console.log(apiResponseDocs); // O cualquier otra acción que desees realizar
+        //console.log("YA LLEGO EL INE: ",apiResponseDocs.data);
 
         setShowAlertProgress(false);
         setShowButton(true);
         setShowAlertTittle("Éxito en el guardado");
         setShowAlertMessage("Se han guardado tus datos correctamente");
         setResponseExitoso(true);
+        
+      
       } catch (error) {
         console.log("nombre " + name + "  email" + email + " pass " + password);
         console.error(error);
@@ -430,7 +283,7 @@ const CrearCuentaFormLimpiadorScreen = ({ navigation, route }) => {
         onConfirmPressed={() => {
           setShowAlert(false);
           if (responseExitoso) {
-            navigation.navigate("Login");
+            navigation.navigate("CrearDocumentacionLimpiador");
           }
         }}
         confirmButtonStyle={{
@@ -486,7 +339,7 @@ const CrearCuentaFormLimpiadorScreen = ({ navigation, route }) => {
         {passwordError !== "" && (
           <Text style={registerStyles.errorText}>{passwordError}</Text>
         )}
-        <CustomButton title="Registrarse" onPress={handleUploadImage} />
+        <CustomButton title="Registrarse" onPress={handleUploadImage } />
         <ButtonText
           onPress={irALogin}
           text="¿Ya tienes cuenta?  Inicia sesión aqui"

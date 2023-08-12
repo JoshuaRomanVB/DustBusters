@@ -14,6 +14,7 @@ import * as DocumentPicker from 'expo-document-picker';
 
 export default function CrearDocumentacionLimpiador({ route, navigation }) {
 
+  const [dataUser, setDataUser] = React.useState({});
   const [selectedDocsCount, setSelectedDocsCount] = useState(0);
   const [selectedDocs, setSelectedDocs] = useState({});
   const defaultButtonTitles = {
@@ -22,6 +23,11 @@ export default function CrearDocumentacionLimpiador({ route, navigation }) {
     "COMPROBANTE DE DOMICILIO": "COMPROBANTE DE DOMICILIO",
     "CURP": "CURP",
   };
+
+  const [selectedIne, setSelectedIne] = useState(0);
+  const [selectedAntecedentes, setSelectedAntecedetes] = useState(0);
+  const [selectedDomicilio, setSelectedDomicilio] = useState(0);
+  const [selectedCurp, setSelectedCurp] = useState(0);
 
   const [fileDocBlob, setFileDocBlob] = useState([]);
   const [fileDocName, setFileDocName] = useState([]);
@@ -76,6 +82,7 @@ export default function CrearDocumentacionLimpiador({ route, navigation }) {
           [title]: fileDocName,
         }));
         setSelectedDocsCount(prevCount => prevCount + 1);
+        setSelectedIne(1);
         
       // Mostrar la imagen seleccionada sin subirla a Firebase Storage
       setDocumentUri(fileUri);
@@ -111,6 +118,7 @@ export default function CrearDocumentacionLimpiador({ route, navigation }) {
           [title]: fileDocNameAntecedentes,
         }));
         setSelectedDocsCount(prevCount => prevCount + 1);
+        setSelectedAntecedetes(1);
         
       // Mostrar la imagen seleccionada sin subirla a Firebase Storage
       setDocumentUriAntecedentes(fileUri);
@@ -146,6 +154,7 @@ export default function CrearDocumentacionLimpiador({ route, navigation }) {
           [title]: fileDocNameDomicilio,
         }));
         setSelectedDocsCount(prevCount => prevCount + 1);
+        setSelectedDomicilio(1);
         
       // Mostrar la imagen seleccionada sin subirla a Firebase Storage
       setDocumentUriDomicilio(fileUri);
@@ -181,6 +190,7 @@ export default function CrearDocumentacionLimpiador({ route, navigation }) {
           [title]: fileDocNameCurp,
         }));
         setSelectedDocsCount(prevCount => prevCount + 1);
+        setSelectedCurp(1);
         
       // Mostrar la imagen seleccionada sin subirla a Firebase Storage
       setDocumentUriCurp(fileUri);
@@ -199,19 +209,7 @@ export default function CrearDocumentacionLimpiador({ route, navigation }) {
 
   /////////////////////////////////////
   function irACrearCuentaFormLimpiador() {
-    navigation.navigate("CrearCuentaFormLimpiador", {
-      fileBlob: route.params.fileBlob,
-      fileName: route.params.fileName,
-      selectedDocs: selectedDocs,
-      fileDocBlob: fileDocBlob,
-      fileDocName: fileDocName,
-      fileDocBlobAntecedentes: fileDocBlobAntecedentes,
-      fileDocNameAntecedentes: fileDocNameAntecedentes,
-      fileDocBlobDomicilio: fileDocBlobDomicilio,
-      fileDocNameDomicilio: fileDocNameDomicilio,
-      fileDocBlobCurp: fileDocBlobCurp,
-      fileDocNameCurp: fileDocNameCurp
-    });
+    navigation.navigate("Login");
     console.log("DOC: ",fileDocBlob)
     console.log("SELECTED: ",selectedDocs)
     console.log("DOC NAME", fileDocName);
@@ -243,18 +241,34 @@ export default function CrearDocumentacionLimpiador({ route, navigation }) {
         </View>
         {selectedDocsCount < 4 && (
           <>
+          {selectedIne < 1 && (
+            <>
             <View style={styles.botonI}>
-              <BotonDocumentos title='INE' onPress={() => handleChooseDocument("INE")} selected={selectedDocs["INE"]} defaultButtonTitles={defaultButtonTitles} />
+              <BotonDocumentos title="INE" onPress={() => handleChooseDocument("INE")} selected={selectedDocs["INE"]} defaultButtonTitles={defaultButtonTitles} />
             </View>
+            </>
+          )}
+          {selectedAntecedentes < 1 && (
+            <>
             <View style={styles.botonC}>
               <BotonDocumentos title="CARTA ANTECEDENTES NO PENALES" onPress={() => handleChooseDocumentAntecedentes("CARTA ANTECEDENTES NO PENALES")} selected={selectedDocs["CARTA ANTECEDENTES NO PENALES"]} defaultButtonTitles={defaultButtonTitles} />
             </View>
-            <View style={styles.botonC2}>
+            </>
+          )}  
+            {selectedDomicilio < 1 && (
+              <>
+              <View style={styles.botonC2}>
               <BotonDocumentos title="COMPROBANTE DE DOMICILIO" onPress={() => handleChooseDocumentDomicilio("COMPROBANTE DE DOMICILIO")} selected={selectedDocs["COMPROBANTE DE DOMICILIO"]} defaultButtonTitles={defaultButtonTitles} />
             </View>
-            <View style={styles.botonC3}>
+              </>
+            )}
+            {selectedCurp < 1 && (
+              <>
+              <View style={styles.botonC3}>
               <BotonDocumentos title="CURP" onPress={() => handleChooseDocumentCurp("CURP")} selected={selectedDocs["CURP"]} defaultButtonTitles={defaultButtonTitles} />
             </View>
+              </>
+            )}
           </>
         )}
         {selectedDocsCount === 4 && (
