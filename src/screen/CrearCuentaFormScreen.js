@@ -25,6 +25,7 @@ import CustomButton from '../components/CustomButton';
 import axios from 'axios';
 import CustomHeader from '../components/CustomHeader';
 import Constants from 'expo-constants';
+
 const CrearCuentaFormScreen = ({ navigation, route }) => {
 	const { fileBlob, fileName } = route.params;
 	const baseUrl = Constants.manifest.extra.baseUrl;

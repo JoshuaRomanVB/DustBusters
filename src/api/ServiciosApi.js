@@ -3,40 +3,27 @@ import React, { useEffect, useCallback, useState } from 'react';
 
 import axios from 'axios';
 import MisSolicitudes from '../components/ServiciosList';
-import { getUserToken } from '../utils/sessionStorage';
+import { getUserToken,getUserId } from '../utils/sessionStorage';
 import { useFocusEffect } from '@react-navigation/native';
 import Constants from 'expo-constants';
+
 export default function ServiciosApi({ navigation }) {
 	const baseUrl = Constants.manifest.extra.baseUrl;
 	const [servicios, setServicios] = useState([]);
 	const [token, setToken] = useState('');
 
-	// useEffect(() => {
-	// 	const loadToken = async () => {
-	// 		const userToken = await getUserToken();
-	// 		//console.log('TokenEffectDetalleServcio: ' + userToken);
-	// 		console.log('lati', servicios.latitud);
-	// 		console.log('long', servicios.longitud);
-	// 		setToken(userToken);
-	// 	};
-
-	// 	loadToken();
-	// }, []);
-	// const loadToken = async () => {
-	// 	const userToken = await getUserToken();
-	// 	//console.log('TokenEffectDetalleServcio: ' + userToken);
-	// 	// console.log('lati', servicios.latitud);
-	// 	// console.log('long', servicios.longitud);
-	// 	setToken(userToken);s
-	// };
 	useFocusEffect(
-		useCallback(() => {
-			//loadToken();
-			const fetchData = async () => {
+		React.useCallback(() => {
+		  const loadProfile = async () => {
+			try {
+			  const token = await getUserToken();
+			  const id = await getUserId();
+			  if (token) {
+				const url = baseUrl + '/api/servicios/byidcliente/' + id;
 				try {
-					const response = await axios.get(baseUrl + '/api/servicios', {
+					const response = await axios.get(url, {
 						headers: {
-							Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXN0ZXJpbzM2N0BnbWFpbC5jb20iLCJpYXQiOjE2OTE2MjI0MzcsImV4cCI6MTY5MTcwODgzN30.8k2w0aJxBclBvJxgNJn26pYbLTFPjCU9uzisOdZsQHc`, // Reemplaza 'token' con tu variable que contiene el token
+							Authorization: `Bearer ${token}`,
 						},
 					});
 					setServicios(response.data);
@@ -45,10 +32,23 @@ export default function ServiciosApi({ navigation }) {
 				} catch (error) {
 					console.error(error);
 				}
-			};
-			fetchData();
+			  } else {
+				console.log("El token o los datos del usuario están vacíos.");
+			  }
+	
+			} catch (error) {
+			  console.error("Error al cargar el perfil:", error);
+			}
+		  };
+		  loadProfile();
+		  return () => {
+			// aquí puedes cancelar cualquier operación pendiente si es necesario
+		  };
 		}, [])
-	);
+	  );
+	
+	
+	
 	return (
 		//Crear componente importar y pasar props
 		<View>

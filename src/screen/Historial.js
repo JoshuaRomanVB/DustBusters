@@ -3,103 +3,95 @@ import {
 	Text,
 	Image,
 	StyleSheet,
-	Button,
-	ScrollView,
+	FlatList,
+	SafeAreaView,
 } from 'react-native';
-import React from 'react';
-import { Entypo } from '@expo/vector-icons';
+import Constants from "expo-constants";
+import {
+  getUserToken,
+  getUserId,
+
+} from "../utils/sessionStorage";
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useEffect, useCallback, useState } from 'react';
+import axios from "axios";
+import HistorialCard from '../components/HistorialCard';
 
 export default function Historial() {
-	return (
-		<ScrollView style={{ flex: 1 }}>
-			<Text style={styles.titulo}>Historial</Text>
+	const baseUrl = Constants.manifest.extra.baseUrl;
+	const [servicios, setServicios] = useState([]);
 
-			<View style={styles.card}>
-				<Image
-					source={{
-						uri: 'https://mansionesmiami.com/wp-content/uploads/2020/05/620-Arvida-Pkwy-Coral-Gables-FL-33156-1.jpg',
-					}}
-					style={styles.image}
-				/>
-				<View style={{ flex: 1, flexDirection: 'row' }}>
-					<View style={{ flex: 1 }}>
-						<Text style={{ ...styles.texto, fontSize: 20 }}>Peñuelas</Text>
-						<Text style={styles.texto}>Todos los servicios </Text>
-						<Text style={styles.texto}>2 Plantas </Text>
-					</View>
-					<View style={{ flex: 1 }}>
-						<Text style={styles.textoCalificar}>CALIFICAR</Text>
-					</View>
-					<View style={{ flex: 0.5, marginTop: 24, marginLeft: 5 }}>
-						<Entypo name='location-pin' size={28} color='blue' />
-					</View>
-					<View style={{ flex: 1 }}>
-						<Text style={styles.textoPagado}>PAGADO</Text>
-					</View>
-				</View>
-			</View>
-			<View style={styles.card}>
-				<Image
-					source={{
-						uri: 'https://ca-times.brightspotcdn.com/dims4/default/570fbde/2147483647/strip/true/crop/4938x2936+0+0/resize/1200x713!/quality/80/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2F90%2F03%2F12089105491898b4bf70102eb77d%2Ffi-hotprop-makowsky-billionaire.jpg',
-					}}
-					style={styles.image}
-				/>
-				<View style={{ flex: 1, flexDirection: 'row' }}>
-					<View style={{ flex: 1 }}>
-						<Text style={{ ...styles.texto, fontSize: 20 }}>Col.Centro</Text>
-						<Text style={styles.texto}>Servicio empresarial </Text>
-						<Text style={styles.texto}>400 m2 </Text>
-					</View>
-					<View style={{ flex: 1 }}>
-						<Text style={styles.textoCalificar}>CALIFICAR</Text>
-					</View>
-					<View style={{ flex: 0.5, marginTop: 24, marginLeft: 5 }}>
-						<Entypo name='location-pin' size={28} color='blue' />
-					</View>
-					<View style={{ flex: 1 }}>
-						<Text style={styles.textoPagado}>PAGADO</Text>
-					</View>
-				</View>
-			</View>
-			<View style={styles.card}>
-				<Image
-					source={{
-						uri: 'https://st3.idealista.com/news/archivos/styles/fullwidth_xl/public/2020-06/im-191825.jpg?VersionId=H30j04J4vZFBf8nX6Otwwe0l4Vjfo96b&itok=lgCc-eBK',
-					}}
-					style={styles.image}
-				/>
-				<View style={{ flex: 1, flexDirection: 'row' }}>
-					<View style={{ flex: 1 }}>
-						<Text style={{ ...styles.texto, fontSize: 20 }}>Sauces</Text>
-						<Text style={styles.texto}>Todos los servicios </Text>
-						<Text style={styles.texto}>1 Planta </Text>
-					</View>
-					<View style={{ flex: 1 }}>
-						<Text style={styles.textoCalificar}>CALIFICAR</Text>
-					</View>
-					<View style={{ flex: 0.5, marginTop: 24, marginLeft: 5 }}>
-						<Entypo name='location-pin' size={28} color='blue' />
-					</View>
-					<View style={{ flex: 1 }}>
-						<Text style={styles.textoPagado}>PAGADO</Text>
-					</View>
-				</View>
-			</View>
-		</ScrollView>
-	);
+	useFocusEffect(
+		React.useCallback(() => {
+		  const loadProfile = async () => {
+			try {
+			  const token = await getUserToken();
+			  const id = await getUserId();
+			  if (token) {
+				const url = baseUrl + '/api/servicios/historial/' + id;
+				try {
+					const response = await axios.get(url, {
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					});
+					setServicios(response.data);
+
+					console.log(servicios);
+				} catch (error) {
+					console.error(error);
+					if (error.response && error.response.status === 404) {
+						console.error('Recurso no encontrado:', error);
+						// Aquí puedes mostrar un mensaje de error al usuario o tomar otra acción
+						setServicios('No posee un historial aún.');
+					  } else {
+						console.error('Error en la solicitud:', error);
+					  }
+				}
+			  } else {
+				console.log("El token o los datos del usuario están vacíos.");
+			  }
+	
+			} catch (error) {
+			  console.error("Error al cargar el perfil:", error);
+			}
+		  };
+		  loadProfile();
+		  return () => {
+			// aquí puedes cancelar cualquier operación pendiente si es necesario
+		  };
+		}, [])
+	  );
+	
+	  return (
+		<SafeAreaView>
+		  <View style={styles.container}>
+			<Text
+			  style={styles.titulo}
+			>
+			  Mi Historial
+			</Text>
+		  </View>
+		  {servicios === 'No posee un historial aún.' ? (
+			<Text style={{ alignSelf: 'center', fontSize: 18 }}>
+			  No posee un historial aún.
+			</Text>
+		  ) : (
+			<FlatList
+			  data={servicios}
+			  numColumns={1}
+			  showsVerticalScrollIndicator={false}
+			  showsHorizontalScrollIndicator={false}
+			  keyExtractor={(character) => String(character.serviceId)}
+			  renderItem={({ item, index }) => <HistorialCard servicios={item} />}
+			/>
+		  )}
+		</SafeAreaView>
+	  );
+	  
 }
 const styles = StyleSheet.create({
-	card: {
-		flex: 1,
-		alignItems: 'center',
-		justifyContent: 'center',
-		width: 335,
-		marginLeft: 20,
-		marginTop: 20,
-		backgroundColor: '#fff',
-		overflow: 'hidden', // Recortar el contenido si se desborda
-	},
+
 	titulo: {
 		fontSize: 20,
 		fontWeight: 'bold',
@@ -131,4 +123,6 @@ const styles = StyleSheet.create({
 		borderRadius: 10,
 		marginTop: 20,
 	},
+
+
 });

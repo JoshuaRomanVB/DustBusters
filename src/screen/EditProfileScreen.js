@@ -21,13 +21,16 @@ import {
   saveUserData,
   clearUserData,
 } from "../utils/sessionStorage";
-import { launchImageLibrary } from "react-native-image-picker";
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { storage } from '../utils/firebaseConfig';
+import * as ImagePicker from "expo-image-picker";
 import AwesomeAlert from "react-native-awesome-alerts";
 import { colors } from "../styles/colors";
-import { storage } from "../utils/firebaseConfig";
 import CustomHeader from "../components/CustomHeader";
+import Constants from "expo-constants";
 
 const EditProfileScreen = ({ navigation }) => {
+  const baseUrl = Constants.manifest.extra.baseUrl;
   //Alert dialog
   const [showAlert, setShowAlert] = useState(false);
   const [showAlertProgress, setShowAlertProgress] = useState(false);
@@ -50,68 +53,113 @@ const EditProfileScreen = ({ navigation }) => {
 
   // Función para seleccionar y mostrar la imagen sin subirla a Firebase Storage
   const handleChooseImage = async () => {
-    const options = {
-      noData: true,
-    };
-    launchImageLibrary(options, async (response) => {
-      if (response.assets[0].uri) {
-        const fileUri = response.assets[0].uri;
-        const fileName = fileUri.substring(fileUri.lastIndexOf("/") + 1);
-
-        try {
-          // Obtener los datos del archivo como un blob utilizando fetch
-          const fileResponse = await fetch(fileUri);
-          const fileBlob = await fileResponse.blob();
-
-          // Mostrar la imagen seleccionada sin subirla a Firebase Storage
-          setImageUri(fileUri);
-
-          // Guardar la imagen en una variable para subirla posteriormente
-          setFileBlob(fileBlob);
-          setFileName(fileName);
-        } catch (error) {
-          console.error("Error al leer el archivo:", error);
-        }
-      } else {
-        console.log(response);
-      }
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      console.log("Permission denied");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
     });
-  };
-
-  // Función para subir la imagen a Firebase Storage y actualizar el enlace en el servidor
-  const handleUploadImage = async () => {
-    try {
-      // Verificar si hay una imagen seleccionada para subir
-      if (fileBlob && fileName) {
-        // Crear una referencia al archivo en Firebase Storage
-        const filePath = `usuarios/${fileName}`;
-        const storageRef = ref(storage, filePath);
-
-        // Subir el blob al Firebase Storage
-        const uploadTask = storageRef.put(fileBlob);
-        uploadTask.on(
-          "state_changed",
-          null,
-          (error) => console.error(error),
-          () => {
-            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-              console.log(`Imagen subida: ${downloadURL}`);
-
-              // Actualizar la URL de la imagen en tu estado
-              setImageUri(downloadURL);
-
-              // Llamar a handlerUpdateProfile con la nueva imagen
-              handlerUpdateProfile(downloadURL);
-            });
-          }
-        );
-      } else {
-        handlerUpdateProfile(dataUser.imagen);
+    if (!result.canceled) {
+      const fileUri = result.assets[0].uri;
+      const fileName = fileUri.substring(fileUri.lastIndexOf("/") + 1);
+  
+      try {
+        // Convertir la URI a un Blob utilizando la función uriToBlob
+        const fileBlob = await uriToBlob(fileUri);
+  
+        // Mostrar la imagen seleccionada sin subirla a Firebase Storage
+        setImageUri(fileUri);
+  
+        // Guardar el Blob y el nombre del archivo en variables para subirlos posteriormente
+        setFileBlob(fileBlob);
+        setFileName(fileName);
+      } catch (error) {
+        console.error("Error al leer el archivo:", error);
       }
-    } catch (error) {
-      console.error("Error al subir la imagen:", error);
+    } else {
+      console.log(result);
     }
   };
+  
+  // Agrega esta función al mismo archivo o importa desde el archivo donde se define
+  function uriToBlob(uri) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+  
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+  
+      xhr.onerror = function () {
+        reject(new Error('uriToBlob failed'));
+      };
+  
+      xhr.responseType = 'blob';
+      xhr.open('GET', uri, true);
+      xhr.send(null);
+    });
+  }
+  // Función para subir la imagen a Firebase Storage y actualizar el enlace en el servidor
+	const handleUploadImage = async () => {
+		try {
+			// Verificar si hay una imagen seleccionada para subir
+			if (fileBlob && fileName) {
+				// Crear una referencia al archivo en Firebase Storage
+				const filePath = `usuarios/${fileName}`;
+				const storageRef = ref(storage, filePath);
+
+				// Subir el blob al Firebase Storage
+				const uploadTask = uploadBytesResumable(storageRef, fileBlob);
+
+				uploadTask.on(
+					'state_changed',
+					(snapshot) => {
+						// Observar eventos de cambio de estado como progreso, pausa y reanudación
+						// Obtener el progreso de la tarea, incluyendo el número de bytes subidos y el número total de bytes a subir
+						const progress =
+							(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+						console.log('Upload is ' + progress + '% done');
+						switch (snapshot.state) {
+							case 'paused':
+								console.log('Upload is paused');
+								break;
+							case 'running':
+								console.log('Upload is running');
+								break;
+						}
+					},
+					(error) => {
+						// Manejar errores de subida fallida
+						console.error('Error al subir la imagen:', error);
+					},
+					() => {
+						// Manejar subida exitosa en la finalización
+						// Por ejemplo, obtener la URL de descarga: https://firebasestorage.googleapis.com/...
+						getDownloadURL(uploadTask.snapshot.ref).then(
+							(downloadURL) => {
+								console.log('File available at', downloadURL);
+
+								// Actualizar la URL de la imagen en tu estado
+								setImageUri(downloadURL);
+
+								// Llamar a handleregister con la nueva imagen
+								handlerUpdateProfile(downloadURL);
+							}
+						);
+					}
+				);
+			} else {
+				handlerUpdateProfile('../assets/images/perfil.png');
+			}
+		} catch (error) {
+			console.error('Error al subir la imagen:', error);
+		}
+	};
 
   const handlerUpdateProfile = async (imageURL) => {
     handleUploadImage;
@@ -123,21 +171,29 @@ const EditProfileScreen = ({ navigation }) => {
     setShowAlertMessage("Por favor espera...");
 
     try {
+      console.log( baseUrl + '/api/usuarios/' + dataUser.userId)
+
+      const data ={
+        userId: dataUser.userId,
+        correo: email,
+        nombreCompleto: name,
+        numeroTelefono: telefono,
+        password: dataUser.password,
+        enabled: true,
+        tipoUsuario: dataUser.tipoUsuario,
+        fotoPerfil: imageURL,
+        fechaRegistro: dataUser.fechaRegistro,
+        authorities: [
+          {
+            id: 1,
+            authority: "ROLE_ADMIN",
+            userId: dataUser.userId, // Cambia esto con el ID correcto del usuario
+          },
+        ],
+      }
+      console.log(data)
       const response = await axios.put(
-        "https://keen-napier.68-168-208-58.plesk.page/api/Usuarios",
-        {
-          tbUsuarioId: dataUser.tbUsuarioId,
-          nombre: name,
-          correo: email,
-          fechaReg: dataUser.fechaReg,
-          ultimaActividad: dataUser.ultimaActividad,
-          estatus: dataUser.estatus,
-          uid: dataUser.uid,
-          idOpenP: dataUser.idOpenP,
-          imagen: imageURL,
-          password: dataUser.password,
-          telefono: telefono,
-        },
+        baseUrl + '/api/usuarios/' + dataUser.userId, data,
         {
           headers: {
             Authorization: `Bearer ${token}`, // Reemplaza 'token' con tu variable que contiene el token
@@ -152,16 +208,7 @@ const EditProfileScreen = ({ navigation }) => {
       setShowAlertMessage("Se ha actualizado su perfil correctamente");
       setResponseExitoso(true);
     } catch (error) {
-      console.log(
-        "nombre " +
-          name +
-          "  apPat" +
-          appat +
-          "  apMat" +
-          apmat +
-          "  email" +
-          email
-      );
+      
       console.error(error);
       setShowAlertProgress(false);
       setShowButton(true);
@@ -215,7 +262,7 @@ const EditProfileScreen = ({ navigation }) => {
           onConfirmPressed={() => {
             setShowAlert(false);
             if (responseExitoso) {
-              navigation.navigate("MainScreen");
+              navigation.navigate("Login");
             }
           }}
           confirmButtonStyle={{
@@ -256,9 +303,7 @@ const EditProfileScreen = ({ navigation }) => {
           onChangeText={setName}
           defaultValue={name}
         />
-        <Text style={[typography.body, registerStyles.inputText]}>
-          Apellido Paterno
-        </Text>
+       
         <Text style={[typography.body, registerStyles.inputText]}>
           Correo electronico
         </Text>
