@@ -5,14 +5,14 @@ import { useNavigation } from "@react-navigation/native";
 import { Entypo } from "@expo/vector-icons";
 import CustomButton from "../components/CustomButton";
 import { TouchableOpacity } from "react-native-gesture-handler";
-export default function ServiciosCard(props) {
+export default function ServiciosCardLimpiador(props) {
   const navigation = useNavigation();
   const { servicios } = props;
   //console.log(servicios);
 
 
   function irAServicio() {
-    navigation.navigate("Servicio", { servicios: servicios });
+    navigation.navigate("ServicioLimpiador", { servicios: servicios });
   }
 
   console.log(servicios.fechaServicio)

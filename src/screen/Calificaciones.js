@@ -23,7 +23,8 @@ import StarRating from "../components/StarRating";
 import axios from "axios";
 import { colors } from "../styles/colors";
 
-export default function Calificaciones() {
+export default function Calificaciones({route}) {
+	const { userId } = route.params;
   const baseUrl = Constants.manifest.extra.baseUrl;
   const [ratingUser, setRatingUser] = React.useState();
   const [dataUser, setDataUser] = React.useState({});
@@ -32,15 +33,14 @@ export default function Calificaciones() {
     React.useCallback(() => {
       const loadProfile = async () => {
         try {
-          setDataUser(await getUserData());
-          const userData = await getUserData();
           const token = await getUserToken();
 
-          if (userData && token) {
+          if (token) {
             const url =
               baseUrl +
               "/api/calificaciones/calificacion-general/" +
-              userData.userId;
+              userId;
+              console.log(url)
             const response = await axios.get(url, {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -49,13 +49,23 @@ export default function Calificaciones() {
 
             setRatingUser(response.data);
             console.log(response.data);
+
+
+            console.log( baseUrl + "/api/usuarios/" + userId)
+            const userApiUrl = baseUrl + "/api/usuarios/" + userId;
+            const userApiResponse = await axios.get(userApiUrl, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            setDataUser(userApiResponse.data)
           } else {
             console.log("El token o los datos del usuario están vacíos.");
           }
 
-          if (userData && token) {
+          if ( token) {
             const url =
-              baseUrl + "/api/calificaciones/por-usuario/" + userData.userId;
+              baseUrl + "/api/calificaciones/por-usuario/" + userId;
             const response = await axios.get(url, {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -109,7 +119,7 @@ export default function Calificaciones() {
 			>
       <CustomHeader />
       <View style={styles.contenedorT}>
-        <Text style={styles.titulo}>Perfil</Text>
+        <Text style={styles.titulo}>Calificaciones</Text>
         {dataUser && dataUser.fotoPerfil ? (
           <Image source={{ uri: dataUser.fotoPerfil }} style={styles.image} />
         ) : (

@@ -8,6 +8,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import PerfilScreen from '../screen/PerfilScreen';
 import Historial from '../screen/Historial';
 import ServiciosApi from '../api/ServiciosApi';
+import ServiciosApiAll from '../api/ServiciosApiAll';
 
 export default function TabsLimpiador() {
 	const Tab = createBottomTabNavigator();
@@ -51,7 +52,7 @@ export default function TabsLimpiador() {
 			/>
 			<Tab.Screen
 				name='home'
-				component={ServiciosApi}
+				component={ServiciosApiAll}
 				options={{ tabBarLabel: '' }}
 			/>
 			<Tab.Screen

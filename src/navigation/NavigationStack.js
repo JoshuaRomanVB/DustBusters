@@ -3,6 +3,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginForm from '../components/Auth/LoginForm';
 import TabsCliente from './TabsCliente';
+import TabsLimpiador from './TabsLimpiador';
 import CrearCuentaTipo from '../screen/CrearCuentaTipo';
 import CrearLimpiadorFoto from '../screen/CrearLimpiadorFoto';
 import CrearClienteFoto from '../screen/CrearClienteFoto';
@@ -18,6 +19,9 @@ import CrearCuentaFormLimpiadorScreen from '../screen/CrearCuentaFormLimpiador';
 import Chat from '../screen/Chat';
 import EditProfileScreen from '../screen/EditProfileScreen';
 import EditarServicio from '../screen/EditarServicio';
+import ChatsScreen from '../screen/ChatsScreen';
+import ChatScreen from '../screen/ChatScreen';
+import DetalleServicioLimpiador from '../screen/DetalleServicioLimpiador';
 
 export default function NavigationAccount() {
 	const Stack = createStackNavigator();
@@ -35,7 +39,7 @@ export default function NavigationAccount() {
 			/>
 			<Stack.Screen
 				name='TabsLimpidores'
-				component={TabsCliente}
+				component={TabsLimpiador}
 				options={{ headerShown: false }}
 			/>
 			<Stack.Screen
@@ -104,6 +108,11 @@ export default function NavigationAccount() {
 				component={DetalleServicio}
 				options={{ headerShown: false }}
 			/>
+					<Stack.Screen
+				name='ServicioLimpiador'
+				component={DetalleServicioLimpiador}
+				options={{ headerShown: false }}
+			/>
 			<Stack.Screen
 				name='Chat'
 				component={Chat}
@@ -113,6 +122,16 @@ export default function NavigationAccount() {
 			<Stack.Screen
 				name='EditarUsuario'
 				component={EditProfileScreen}
+				options={{ headerShown: false }}
+			/>
+				<Stack.Screen
+				name='ChatsScreen'
+				component={ChatsScreen}
+				options={{ headerShown: false }}
+			/>
+				<Stack.Screen
+				name='ChatScreen'
+				component={ChatScreen}
 				options={{ headerShown: false }}
 			/>
 		</Stack.Navigator>

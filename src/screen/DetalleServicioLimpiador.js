@@ -14,31 +14,102 @@ import CustomHeader from '../components/CustomHeader';
 import AwesomeAlert from 'react-native-awesome-alerts';
 import Constants from 'expo-constants';
 import axios from 'axios';
+import { db, auth } from "../utils/firebaseConfig"; 
 import {
+	getUserId,
 	// getUserData,
 	getUserToken,
 	// saveUserData,
 	// clearUserData,
 } from '../utils/sessionStorage';
 import { BackHandler } from 'react-native';
+import {
+	collection,
+	getDocs,
+	limit,
+	addDoc,
+	query,
+	where,
+	serverTimestamp 
+  } from "firebase/firestore";
 
-export default function DetalleServicio({ route, navigation }) {
+export default function DetalleServicioLimpiador({ route, navigation }) {
 	const baseUrl = Constants.manifest.extra.baseUrl;
 	const { servicios } = route.params;
 	const id = servicios.serviceId;
+	const idCliente = servicios.cliente.userId;
 	const [token, setToken] = useState('');
+	const [userId, setUserId] = useState('');
 	
 	useEffect(() => {
 		const loadToken = async () => {
 			const userToken = await getUserToken();
+			const userId = await getUserId();
 			//console.log('TokenEffectDetalleServcio: ' + userToken);
 			//console.log('latitud', servicios.latitud);
 			//console.log('longitud', servicios.longitud);
 			setToken(userToken);
+			setUserId(userId);
 		};
 
 		loadToken();
 	}, [navigation, route]);
+
+	const handleStartChat = async () => {
+		try {
+
+			const chatSnapshot1 = await getDocs(
+				query(
+				  collection(db, "Chats"),
+				  where("users", "==", [userId, idCliente]),
+				  limit(1)
+				)
+			  );
+		
+			  // Verificar si ya existe un chat entre los usuarios (caso 2)
+			  const chatSnapshot2 = await getDocs(
+				query(
+				  collection(db, "Chats"),
+				  where("users", "==", [idCliente, userId]),
+				  limit(1)
+				)
+			  );
+		
+			  let chatId = "";
+		
+			  if (!chatSnapshot1.empty) {
+				// Existe un chat entre los usuarios (caso 1)
+				chatId = chatSnapshot1.docs[0].data().id;
+			  } else if (!chatSnapshot2.empty) {
+				// Existe un chat entre los usuarios (caso 2)
+				chatId = chatSnapshot2.docs[0].data().id;
+			  } else {
+		  const chatId = generateChatId(); // Generar un ID único para el chat
+		  const newChat = {
+			id: chatId,
+			serviceId: id,
+			users: [userId, idCliente], // Cambiar por el ID de usuario 2
+		  };
+	
+		  await addDoc(collection(db, "Chats"), newChat);
+		}
+		  // Redirigir a la pantalla de chat
+		  navigation.navigate("ChatScreen", {
+			chatId: chatId,
+			senderId: userId,
+			receiverId: idCliente, // Cambiar por el ID de usuario 2
+		  });
+		} catch (error) {
+		  console.log("Error al iniciar el chat:", error);
+		}
+	  };
+	  const generateChatId = () => {
+		const randomId = Math.random().toString(36).substring(7);
+		const timestamp = Date.now().toString();
+		const chatId = `${randomId}-${timestamp}`;
+	
+		return chatId;
+	  };
 
 	const [showAlert, setShowAlert] = useState(false);
 
@@ -68,8 +139,8 @@ export default function DetalleServicio({ route, navigation }) {
 		}
 	};
 
-	function irAChats() {
-		navigation.navigate("ChatsScreen",{
+	function irAChat() {
+		navigation.navigate("ChatScreen",{
 			id_servicio: id
 		});
 	}
@@ -156,60 +227,17 @@ export default function DetalleServicio({ route, navigation }) {
 				<View style={styles.containerBotones}>
 					<TouchableOpacity
 						style={styles.button}
-						onPress={handleEditarClick}
+						
 					>
-						<Text style={styles.buttonText}>Editar</Text>
+						<Text style={styles.buttonText}>Aceptar</Text>
 					</TouchableOpacity>
 				</View>
 				<View style={styles.containerBotones}>
-					<TouchableOpacity style={styles.button} onPress={() => irAChats()}>
+					<TouchableOpacity style={styles.button} onPress={() => handleStartChat()}>
 						<Text style={styles.buttonText}>Chat</Text>
 					</TouchableOpacity>
 				</View>
-				<View style={styles.containerBotones}>
-					<TouchableOpacity
-						style={styles.button}
-						onPress={handleCancelarClick}
-					>
-						<Text style={styles.buttonText}>Cancelar</Text>
-					</TouchableOpacity>
-
-					<AwesomeAlert
-						show={showAlert}
-						showProgress={false}
-						title='¿Seguro que quieres cancelar el servicio?'
-						message='Esta acción no se puede deshacer.'
-						closeOnTouchOutside={true}
-						closeOnHardwareBackPress={false}
-						showCancelButton={true}
-						showConfirmButton={true}
-						cancelText='No, mantener servicio'
-						confirmText='Sí, cancelar servicio'
-						confirmButtonColor='red'
-						cancelButtonColor='#F5AE03'
-						titleStyle={{
-							textAlign: 'center', // Alineación centrada
-							fontSize: 18, // Tamaño del texto del título
-							fontWeight: 'bold', // Negrita
-							color: '#000', // Color del texto del título
-						}}
-						messageStyle={{
-							textAlign: 'center', // Alineación centrada para el mensaje
-							fontSize: 14,
-							color: '#000',
-						}}
-						onCancelPressed={() => {
-							setShowAlert(false);
-							// Aquí puedes agregar la lógica para no cancelar el servicio
-						}}
-						onConfirmPressed={() => {
-							setShowAlert(false);
-							// Aquí puedes agregar la lógica para cancelar el servicio
-							handleDeleteServicio();
-							navigation.goBack();
-						}}
-					/>
-				</View>
+			
 			</View>
 		</ScrollView>
 	);

@@ -50,8 +50,15 @@ export default function LoginForm(props) {
 
 				// Verificar si hay datos de usuario almacenados
 				if (userData) {
+					if (userData.tipoUsuario === 1) {
+						// Si el tipoUsuario es igual a 1, navegar a la pantalla TabsClientes
+						navigation.navigate('TabsClientes');
+					} else {
+						
+						 navigation.navigate("TabsLimpidores");
+					}
 					// Si hay datos de usuario, navegar directamente a "TabsClientes"
-					navigation.navigate('TabsClientes');
+	
 				} else {
 					// Si no hay datos de usuario, navegar a la pantalla de inicio de sesión
 					navigation.navigate('Login');
@@ -94,8 +101,8 @@ export default function LoginForm(props) {
 					// Si el tipoUsuario es igual a 1, navegar a la pantalla TabsClientes
 					navigation.navigate('TabsClientes');
 				} else {
-					// De lo contrario, puedes navegar a otra pantalla (por ejemplo, TabsLimpiador) o realizar otra lógica según tus necesidades
-					// navigation.navigate("TabsLimpiador");
+					
+					 navigation.navigate("TabsLimpidores");
 				}
 			} catch (error) {
 				// Si ocurre un error en la solicitud, puedes manejarlo aquí

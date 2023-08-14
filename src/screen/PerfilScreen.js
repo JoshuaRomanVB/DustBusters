@@ -31,7 +31,7 @@ export default function PerfilScreen({ navigation }) {
   }
 
   function irACalificaciones() {
-    navigation.navigate("Calificaciones");
+    navigation.navigate("Calificaciones",{userId: dataUser.userId});
   }
 
   function irAEditar() {
