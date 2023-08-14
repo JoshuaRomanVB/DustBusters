@@ -75,6 +75,7 @@ export default function DetalleServicio({ route, navigation }) {
 	return (
 		<ScrollView style={{ flex: 1, backgroundColor: '#fff' }}>
 			<CustomHeader />
+			<Text style={styles.titulo}>Detalles del servicio</Text>
 			<View style={styles.card}>
 				<Image
 					source={{
@@ -91,11 +92,11 @@ export default function DetalleServicio({ route, navigation }) {
 							{servicios.descripcionServicio}{' '}
 						</Text>
 						<View style={{ flex: 1, flexDirection: 'row' }}>
-							<Text style={styles.texto}>{servicios.plantas} </Text>
+							<Text style={styles.texto}>{servicios.plantas} planta(s) </Text>
 							<Text style={styles.texto}>
 								{'('}
 								{servicios.tamanoInmueble}
-								{')'}
+								{' m2)'}
 							</Text>
 						</View>
 					</View>
@@ -302,7 +303,8 @@ const styles = StyleSheet.create({
 	titulo: {
 		fontSize: 20,
 		fontWeight: 'bold',
-		marginTop: 30,
+		marginTop: 10,
+		textAlign:'center'
 	},
 	texto: {
 		fontSize: 15,

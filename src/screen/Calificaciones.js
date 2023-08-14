@@ -5,7 +5,8 @@ import {
   StyleSheet,
   Button,
   ScrollView,
-  FlatList
+  FlatList,
+  ImageBackground
 } from "react-native";
 import React from "react";
 import { Entypo } from "@expo/vector-icons";
@@ -20,6 +21,7 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import StarRating from "../components/StarRating";
 import axios from "axios";
+import { colors } from "../styles/colors";
 
 export default function Calificaciones() {
   const baseUrl = Constants.manifest.extra.baseUrl;
@@ -53,9 +55,7 @@ export default function Calificaciones() {
 
           if (userData && token) {
             const url =
-              baseUrl +
-              "/api/calificaciones/por-usuario/" +
-              userData.userId;
+              baseUrl + "/api/calificaciones/por-usuario/" + userData.userId;
             const response = await axios.get(url, {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -67,7 +67,6 @@ export default function Calificaciones() {
           } else {
             console.log("El token o los datos del usuario están vacíos.");
           }
-
         } catch (error) {
           console.error("Error al cargar el perfil:", error);
         }
@@ -81,17 +80,20 @@ export default function Calificaciones() {
     }, [])
   );
 
-
-
   const renderItem = ({ item }) => (
     <View style={styles.cardCalificacion}>
-   <StarRating rating={item.calificacion} />
-      <View style={{ flex: 1, flexDirection: 'row' }}>
+      <StarRating rating={item.calificacion} />
+      <View style={{ flex: 1, flexDirection: "row" }}>
         <View style={{ flex: 1 }}>
-          <Image source={{ uri: item.urlImagenCalificador }} style={styles.image3} />
+          <Image
+            source={{ uri: item.urlImagenCalificador }}
+            style={styles.image3}
+          />
         </View>
         <View style={{ flex: 5 }}>
-          <Text style={{ ...styles.texto, fontSize: 22 }}>{item.nombreCalificador}</Text>
+          <Text style={{ ...styles.texto, fontSize: 22 }}>
+            {item.nombreCalificador}
+          </Text>
           <Text style={{ ...styles.texto }}>{item.comentario}</Text>
         </View>
         <View style={{ flex: 1 }}></View>
@@ -99,36 +101,48 @@ export default function Calificaciones() {
     </View>
   );
 
-
   return (
- 
-      <View style={styles.contenedor}>
-        <CustomHeader />
+    <View style={styles.contenedor}>
+      		<ImageBackground
+				source={require('../assets/images/baclregistro.png')}
+				style={styles.imageback}
+			>
+      <CustomHeader />
+      <View style={styles.contenedorT}>
+        <Text style={styles.titulo}>Perfil</Text>
+        {dataUser && dataUser.fotoPerfil ? (
+          <Image source={{ uri: dataUser.fotoPerfil }} style={styles.image} />
+        ) : (
+          <Image
+            source={{
+              uri: "https://pbs.twimg.com/profile_images/1374611344712929280/WwOf-3tQ_400x400.jpg",
+            }}
+            style={styles.image}
+          />
+        )}
+
+        <Text style={{ ...styles.texto, fontSize: 22 }}>
+          {dataUser.nombreCompleto}
+        </Text>
+        <StarRating rating={ratingUser} />
+      </View>
+
+      {ratingUser ? (
+        <FlatList
+          data={calificaciones}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.calificacionId} // Assuming you have unique IDs for each item
+        />
+      ) : (
         <View style={styles.contenedorT}>
-          <Text style={styles.titulo}>CALIFICACIONES</Text>
-          {dataUser && dataUser.fotoPerfil ? (
-            <Image source={{ uri: dataUser.fotoPerfil }} style={styles.image} />
-          ) : (
-            <Image
-              source={{
-                uri: "https://pbs.twimg.com/profile_images/1374611344712929280/WwOf-3tQ_400x400.jpg",
-              }}
-              style={styles.image}
-            />
-          )}
-
-          <Text style={{ ...styles.texto, fontSize: 22 }}>
-            {dataUser.nombreCompleto}
-          </Text>
-          <StarRating rating={ratingUser} />
+          <Text style={styles.textoCalificar}>Nadie te a calificado</Text>
+          <Image
+            source={require("../../src/assets/images/triste.jpg")}
+            style={styles.image}
+          />
         </View>
-   
-
-      <FlatList
-      data={calificaciones}
-      renderItem={renderItem}
-      keyExtractor={item => item.calificacionId} // Assuming you have unique IDs for each item
-    />
+      )}
+      </ImageBackground>
     </View>
   );
 }
@@ -139,7 +153,6 @@ const styles = StyleSheet.create({
   contenedorT: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
   },
   cardCalificacion: {
     flex: 1,
@@ -157,12 +170,15 @@ const styles = StyleSheet.create({
   },
 
   titulo: {
-    fontSize: 20,
+    fontSize: 30,
     fontWeight: "bold",
+    marginTop: 20,
+    color: colors.white
   },
   texto: {
     fontSize: 15,
     fontWeight: "bold",
+    color: colors.white,
     marginLeft: 10,
     marginTop: 10, // Reducir el margen superior para dar espacio al texto
   },
@@ -210,5 +226,9 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 40,
     marginLeft: 100,
+  },
+  imageback: {
+    flex: 1,
+    resizeMode: "cover",
   },
 });

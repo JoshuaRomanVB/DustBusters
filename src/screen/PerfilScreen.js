@@ -100,7 +100,7 @@ export default function PerfilScreen({ navigation }) {
           />
         )}
 
-        <CustomButton title={"Cerrar sesion"} onPress={handleLogout} />
+        <CustomButton title={"Cerrar sesión"} onPress={handleLogout} />
         <Text style={{ ...styles.texto, fontSize: 22 }}>
     
           {dataUser.nombreCompleto}
@@ -177,11 +177,12 @@ const styles = StyleSheet.create({
     overflow: "hidden", // Recortar el contenido si se desborda
     elevation: 4,
   },
-  titulo: {
-    fontSize: 30,
-    fontWeight: "bold",
-    marginTop: 50,
-  },
+	titulo: {
+		fontSize: 20,
+		fontWeight: 'bold',
+		marginTop: 30,
+		alignSelf: 'center',
+	},
   texto: {
     fontSize: 15,
     fontWeight: "bold",
