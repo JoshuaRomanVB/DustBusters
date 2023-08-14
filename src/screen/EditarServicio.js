@@ -17,17 +17,21 @@ import * as ImagePicker from 'expo-image-picker';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import AwesomeAlert from 'react-native-awesome-alerts';
 import { storage } from '../utils/firebaseConfig';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import Constants from 'expo-constants';
+import { LogBox } from 'react-native';
+
+import {
+	ref,
+	uploadBytesResumable,
+	getDownloadURL,
+	getStorage,
+} from 'firebase/storage';
 import axios from 'axios';
 import { colors } from '../styles/colors';
-import Constants from 'expo-constants';
-import {
-	getUserData,
-	getUserToken,
-	// saveUserData,
-	// clearUserData,
-} from '../utils/sessionStorage';
-
+import { getUserData, getUserToken } from '../utils/sessionStorage';
+import DatePicker from '../components/DatePicker';
+import TimePicker from '../components/TimePicker';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 const windowHeight = Dimensions.get('window').height;
 
 const EditarServicio = ({ route, navigation }) => {
@@ -48,7 +52,17 @@ const EditarServicio = ({ route, navigation }) => {
 	const [fileBlob, setFileBlob] = useState('');
 	const [fileName, setFileName] = useState('');
 	const [imageUri, setImageUri] = useState('');
-	const [nameError, setNameError] = useState('');
+	const [fileBlobError, setFileBlobError] = useState('');
+	const [descripcionServicioError, setDescripcionServicioError] = useState('');
+	const [tamanoError, setTamanoError] = useState('');
+	const [plantasError, setPlantasError] = useState('');
+	const [ofertaClienteError, setOfertaClienteError] = useState('');
+	const [direccionError, setDireccionError] = useState('');
+	const [latError, setLatError] = useState('');
+	const [longError, setLongError] = useState('');
+	const [horaInicioError, setHoraInicioError] = useState('');
+	const [horaFinError, setHoraFinError] = useState('');
+	const [fechaError, setFechaError] = useState('');
 
 	//Alert dialog
 	const [showAlert, setShowAlert] = useState(false);
@@ -65,6 +79,9 @@ const EditarServicio = ({ route, navigation }) => {
 	const dire = servicio.direccion;
 	const latitude = servicio.latitud;
 	const longitude = servicio.longitud;
+	const hInit = servicio.horaInicio;
+	const hFin = servicio.horaFin;
+	const date = servicio.fechaServicio;
 
 	const [descripcionServicio, setDescripcionServicio] = useState(descServicio);
 	const [tamano, setTamano] = useState(tamInmueble);
@@ -73,13 +90,31 @@ const EditarServicio = ({ route, navigation }) => {
 	const [direccion, setDireccion] = useState(dire);
 	const [lat, setLat] = useState(latitude);
 	const [long, setLong] = useState(longitude);
+	const [horaInicio, setHoraInicio] = useState(hInit);
+	const [horaFin, setHoraFin] = useState(hFin);
+	const [fecha, setFecha] = useState(date);
 
+	useEffect(() => {
+		LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
+	}, []);
+
+	const handleDateSelect = (date) => {
+		setFecha(date);
+		console.log(date);
+	};
+
+	const handleHoraInicioSelect = (date) => {
+		setHoraInicio(date);
+		console.log(date);
+	};
+	const handleHoraFinSelect = (date) => {
+		setHoraFin(date);
+		console.log(date);
+	};
 	const [mapRegion, setMapRegion] = useState(defaultRegion); // Establecemos el estado inicial como null
 	useEffect(() => {
 		const loadToken = async () => {
 			const userToken = await getUserToken();
-			//console.log(userToken);
-			//console.log(servicio);
 			setToken(userToken);
 		};
 		const loadUserId = async () => {
@@ -88,10 +123,9 @@ const EditarServicio = ({ route, navigation }) => {
 			//console.log('userDAta: ', userData.authorities[0].userId);
 			setUserId(id);
 		};
-
-		loadToken();
 		setImageUri(URlImage);
 		loadUserId();
+		loadToken();
 	}, []);
 
 	const validateFields = () => {
@@ -99,44 +133,88 @@ const EditarServicio = ({ route, navigation }) => {
 
 		// Validar descripcionServicio
 		if (!descripcionServicio) {
-			setNameError('Por favor ingrese la descripcion del Servicio');
+			setDescripcionServicioError(
+				'Por favor ingrese la descripcion del Servicio'
+			);
 			isValid = false;
 		} else {
-			setNameError('');
+			setDescripcionServicioError('');
 		}
 
 		// Validar tamano del inmueble
 		if (!tamano) {
-			setNameError('Por favor ingrese el tamano del inmueble');
+			setTamanoError('Por favor ingrese el tamano del inmueble');
 			isValid = false;
 		} else {
-			setNameError('');
+			setTamanoError('');
 		}
 
 		// Validar las plantas del inmueble
 		if (!plantas) {
-			setNameError('Por favor ingrese las plantas del inmueble');
+			setPlantasError('Por favor ingrese las plantas del inmueble');
 			isValid = false;
 		} else {
-			setNameError('');
+			setPlantasError('');
 		}
 
 		// Validar tamano del inmueble
 		if (!ofertaCliente) {
-			setNameError('Por favor ingrese el tamano del inmueble');
+			setOfertaClienteError('Por favor ingrese el tamaño del inmueble');
 			isValid = false;
 		} else {
-			setNameError('');
+			setOfertaClienteError('');
 		}
 
 		// Validar lat
 		if (!lat) {
-			setNameError('Por favor ingrese una ubicación');
+			setLatError('Por favor ingrese una ubicación');
 			isValid = false;
 		} else {
-			setNameError('');
+			setLatError('');
+		}
+		// Validar lat
+		if (!fileBlob && !URlImage) {
+			setFileBlobError('Por favor ingrese una imagen');
+			isValid = false;
+		} else {
+			setFileBlobError('');
 		}
 
+		if (!fecha) {
+			setFechaError('Por favor ingrese una fecha valida');
+			isValid = false;
+		} else {
+			setFechaError('');
+		}
+		if (!horaInicio) {
+			setHoraInicioError('Por favor ingrese una ubicación');
+			isValid = false;
+		} else {
+			setHoraInicioError('');
+		}
+		if (!horaFin) {
+			setHoraFinError('Por favor ingrese una ubicación');
+			isValid = false;
+		} else {
+			setHoraFinError('');
+		}
+		const currentDate = new Date();
+		if (fecha < currentDate) {
+			setFechaError('La fecha no puede ser antes de la fecha actual');
+			isValid = false;
+		} else {
+			setFechaError('');
+		}
+
+		// Validar horaInicio: No puede ser antes de la hora fin
+		if (horaInicio >= horaFin) {
+			setHoraInicioError(
+				'La hora de inicio no puede ser igual o posterior a la hora fin'
+			);
+			isValid = false;
+		} else {
+			setHoraInicioError('');
+		}
 		return isValid;
 	};
 
@@ -243,6 +321,7 @@ const EditarServicio = ({ route, navigation }) => {
 					}
 				);
 			} else {
+				//console.log('error al subir la imagen');
 				handleregister(URlImage);
 			}
 		} catch (error) {
@@ -264,29 +343,26 @@ const EditarServicio = ({ route, navigation }) => {
 				const servicioData = {
 					cliente: { userId: userId },
 					descripcionServicio: descripcionServicio,
+					urlImagenServicio: imageURL,
 					tamanoInmueble: tamano,
 					plantas: plantas,
 					ofertaCliente: ofertaCliente,
 					ofertaAceptada: null,
-					//fechaServicio: new Date().toLocaleTimeString,
-					horaInicio: null,
-					horaFin: null,
+					fechaServicio: fecha,
+					horaInicio: horaInicio,
+					horaFin: horaFin,
 					latitud: lat,
 					longitud: long,
 					direccion: direccion,
 					estado: 0,
-					urlImagenServicio: imageURL,
 				};
 
-				const apiResponse = await axios.put(
-					baseUrl + `/api/servicios/${id}`,
-					servicioData,
-					{
-						headers: {
-							Authorization: `Bearer ${token}`, // Reemplaza 'token' con tu variable que contiene el token
-						},
-					}
-				);
+				const url = baseUrl + `/api/servicios/${id}`;
+				const apiResponse = await axios.put(url, servicioData, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
 
 				// Aquí puedes manejar la respuesta de tu API según tus necesidades
 				console.log(apiResponse.data); // O cualquier otra acción que desees realizar
@@ -327,7 +403,7 @@ const EditarServicio = ({ route, navigation }) => {
 						Para editar tu servicio rellena el formulario
 					</Text>
 				</View>
-				<ScrollView
+				<KeyboardAwareScrollView
 					style={styles.scroll}
 					keyboardShouldPersistTaps='handled'
 				>
@@ -341,47 +417,87 @@ const EditarServicio = ({ route, navigation }) => {
 							setDescripcionServicio(text);
 						}}
 					/>
+					{descripcionServicioError !== '' && (
+						<Text style={styles.errorText}>
+							{descripcionServicioError}
+						</Text>
+					)}
 					<Text style={styles.textCodigo}>Tamaño del inmueble</Text>
 					<TextInput
 						placeholder='90m2'
 						defaultValue={servicio.tamanoInmueble}
 						style={[styles.inputText]}
 						autoCapitalize='none'
-						//keyboardType='default'
+						keyboardType='numeric'
 						onChangeText={(text) => {
 							setTamano(text);
 						}}
 					/>
+					{tamanoError !== '' && (
+						<Text style={styles.errorText}>{tamanoError}</Text>
+					)}
 					<Text style={styles.textCodigo}>Plantas</Text>
 					<TextInput
 						placeholder='3 plantas'
 						defaultValue={servicio.plantas}
 						style={[styles.inputTextDetalle]}
 						autoCapitalize='none'
+						keyboardType='numeric'
 						onChangeText={(text) => {
 							setPlantas(text);
 						}}
 					/>
+					{tamanoError !== '' && (
+						<Text style={styles.errorText}>{tamanoError}</Text>
+					)}
 					<Text style={styles.textCodigo}>Oferta del pago</Text>
 					<TextInput
 						placeholder='$3000'
 						defaultValue={oferta}
 						style={[styles.inputText]}
 						autoCapitalize='none'
+						keyboardType='decimal-pad'
 						//skeyboardType='numeric'
 						onChangeText={(text) => {
 							setOfertaCliente(text);
 						}}
 					/>
+					{ofertaClienteError !== '' && (
+						<Text style={styles.errorText}>{ofertaClienteError}</Text>
+					)}
+					<Text style={styles.textCodigo}>Fecha del servicio</Text>
+					<DatePicker
+						onSelectDate={handleDateSelect}
+						defaultValue={date}
+					/>
+					{fechaError !== '' && (
+						<Text style={styles.errorText}>{fechaError}</Text>
+					)}
+					<Text style={styles.textCodigo}>Hora inicio</Text>
+					<TimePicker
+						onSelectTime={handleHoraInicioSelect}
+						selectedTime={servicio.horaInicio}
+					/>
+					{horaInicioError !== '' && (
+						<Text style={styles.errorText}>{horaInicioError}</Text>
+					)}
+					<Text style={styles.textCodigo}>Hora fin</Text>
+					<TimePicker
+						onSelectTime={handleHoraFinSelect}
+						selectedTime={servicio.horaFin}
+					/>
+					{horaFinError !== '' && (
+						<Text style={styles.errorText}>{horaFinError}</Text>
+					)}
 					<Text style={styles.textCodigo}>Dirección</Text>
 					<View>
 						<GooglePlacesAutocomplete
 							placeholder='Dirección'
 							onPress={(data, details = null) => {
 								const { lat, lng } = details.geometry.location;
-								// console.log('Latitud:', lat);
-								// console.log('Longitud:', lng);
-								// console.log(data.structured_formatting.main_text);
+								console.log('Latitud:', lat);
+								console.log('Longitud:', lng);
+								console.log(data.structured_formatting.main_text);
 								//console.log(data);
 								setLat(lat);
 								setLong(lng);
@@ -410,6 +526,9 @@ const EditarServicio = ({ route, navigation }) => {
 							currentLocation={false}
 						/>
 					</View>
+					{latError !== '' && (
+						<Text style={styles.errorText}>{latError}</Text>
+					)}
 					{lat !== '' && long !== '' ? (
 						<View style={styles.containerMap}>
 							<MapView
@@ -432,15 +551,15 @@ const EditarServicio = ({ route, navigation }) => {
 					{imageUri ? (
 						<Image source={{ uri: imageUri }} style={styles.image} />
 					) : null}
+
 					<TouchableOpacity
 						onPress={handleChooseImage}
 						style={styles.button}
 					>
 						<Text style={styles.buttonText}>Seleccionar Imagen</Text>
 					</TouchableOpacity>
-
-					{nameError && (
-						<Text style={styles.errorText}>Revisa los campos</Text>
+					{fileBlobError !== '' && (
+						<Text style={styles.errorText}>{fileBlobError}</Text>
 					)}
 					<TouchableOpacity
 						style={styles.button}
@@ -450,7 +569,7 @@ const EditarServicio = ({ route, navigation }) => {
 					</TouchableOpacity>
 					{/* Espacio en blanco */}
 					<View style={styles.bottomSpace} />
-				</ScrollView>
+				</KeyboardAwareScrollView>
 			</View>
 
 			<AwesomeAlert
@@ -586,7 +705,7 @@ const styles = StyleSheet.create({
 	containerMap: {
 		flex: 1,
 		width: '100%',
-		height: 400,
+		height: 200,
 		alignSelf: 'flex-start',
 		borderRadius: 30,
 		marginTop: 10,
