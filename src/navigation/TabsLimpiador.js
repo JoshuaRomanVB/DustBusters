@@ -9,6 +9,7 @@ import PerfilScreen from '../screen/PerfilScreen';
 import Historial from '../screen/Historial';
 import ServiciosApi from '../api/ServiciosApi';
 import ServiciosApiAll from '../api/ServiciosApiAll';
+import HistorialLimpiador from '../screen/Historial limpiador';
 
 export default function TabsLimpiador() {
 	const Tab = createBottomTabNavigator();
@@ -33,7 +34,7 @@ export default function TabsLimpiador() {
 						iconName = 'user';
 					} else if (route.name === 'home') {
 						return renderIconRM();
-					} else if (route.name === 'historial') {
+					} else if (route.name === 'historialLimpiador') {
 						iconName = 'history';
 					}
 					return <Icon name={iconName} color={color} size={size} />;
@@ -56,8 +57,8 @@ export default function TabsLimpiador() {
 				options={{ tabBarLabel: '' }}
 			/>
 			<Tab.Screen
-				name='historial'
-				component={Historial}
+				name='historialLimpiador'
+				component={HistorialLimpiador}
 				options={{ tabBarLabel: 'Historial' }}
 			/>
 		</Tab.Navigator>
