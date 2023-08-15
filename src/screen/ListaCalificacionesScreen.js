@@ -6,58 +6,145 @@ import {
 	Button,
 	ScrollView,
 } from 'react-native';
-import React from 'react';
+import React, {useState, useEffect} from 'react';
+import CustomHeader from '../components/CustomHeader';
+import StarInput from '../components/StarInput';
+import { getUserToken } from '../utils/sessionStorage';
+import Constants from 'expo-constants';
+import AwesomeAlert from 'react-native-awesome-alerts';
+import { colors } from '../styles/colors';
+import { TextInput } from 'react-native';
+import CustomButton from '../components/CustomButton';
+import axios from 'axios';
 
-export default function ListaCalificacionesScreen() {
+export default function ListaCalificacionesScreen({route, navigation}) {
+	const baseUrl = Constants.manifest.extra.baseUrl;
+	const {servicio}=route.params;
+	const [calificacion, setCalificacion] = useState('');
+	const [comentario, setComentario] = useState('');
+
+	const handleRatingChange = (rating) => {
+		console.log('Calificación seleccionada:', rating);
+		setCalificacion(rating);
+	  };
+	  const [token, setToken] = useState('');
+
+	useEffect(() => {
+		const loadToken = async () => {
+			const userToken = await getUserToken();
+			setToken(userToken);
+		};
+		loadToken();
+	},[]);
+	
+//Alert dialog
+const [showAlert, setShowAlert] = useState(false);
+const [showAlertProgress, setShowAlertProgress] = useState(false);
+const [showButton, setShowButton] = useState(false);
+const [showAlertTittle, setShowAlertTittle] = useState('');
+const [showAlertMessage, setShowAlertMessage] = useState('');
+const [responseExitoso, setResponseExitoso] = useState(false);
+
+const handlecalificacion = async (imageURL) => {
+		setShowAlert(!showAlert);
+		setShowAlertProgress(!showAlertProgress);
+		setShowButton(false);
+		setShowAlertTittle('Subiendo Calificación');
+		setShowAlertMessage('Por favor espera...');
+
+		try {
+			// Segunda petición: Guardar datos del servicio en tu API
+			const servicioData = {
+
+					calificacion: calificacion,
+					nombreCalificador: servicio.cliente.nombreCompleto,
+					idUsuarioCalificado: servicio.limpiador.userId, 
+					urlImagenCalificador: servicio.cliente.fotoPerfil,
+					comentario: comentario
+			
+			};
+
+			const url = baseUrl + `/api/calificaciones`;
+			console.log(servicioData)
+			console.log(url)
+			console.log(token)
+			const apiResponse = await axios.post(url, servicioData, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			// Aquí puedes manejar la respuesta de tu API según tus necesidades
+			console.log(apiResponse.data); // O cualquier otra acción que desees realizar
+
+			setShowAlertProgress(false);
+			setShowButton(true);
+			setShowAlertTittle('Éxito en el guardado');
+			setShowAlertMessage('Se han guardado tus datos correctamente');
+			setResponseExitoso(true);
+		} catch (error) {
+			console.error(error);
+			setShowAlertProgress(false);
+			setShowButton(true);
+			setShowAlertTittle('Error en el guardado');
+			setShowAlertMessage('Inténtelo más tarde');
+		}
+	}
+
+
 	return (
 		<ScrollView style={{ flex: 1 }}>
-			<Text style={styles.titulo}>Peñuelas</Text>
+			<CustomHeader/>
+			<Text style={styles.titulo}>{servicio.descripcionServicio}</Text>
 			<Text style={{...styles.titulo, textAlign: 'center', marginTop: 20}}>Tu opinión es muy importante, califica a nuestros DustBusters</Text>
 			<View style={styles.card}>
 				<Image
 					source={{
-						uri: 'https://pbs.twimg.com/profile_images/1374611344712929280/WwOf-3tQ_400x400.jpg',
+						uri: servicio.limpiador.fotoPerfil,
 					}}
 					style={styles.imageDetalle}
 				/>
-				<Text style={{ ...styles.texto, fontSize: 22 }}>Mari Sánchez </Text>
-				<Image
-					source={{
-						uri: 'https://img.freepik.com/vector-premium/imagen-vectorial-cuatro-estrellas-cinco-buen-nivel_541404-75.jpg?w=2000',
-					}}
-					style={styles.image2}
-				/>
+				<Text style={{ ...styles.texto, fontSize: 22 }}>{servicio.limpiador.nombreCompleto}</Text>
+				<StarInput onChangeRating={handleRatingChange}/>
+				<TextInput 
+						placeholder='Comentario'
+						style={[styles.inputTextDetalle]}
+						autoCapitalize='none'
+						onChangeText={(text) => {
+							setComentario(text);
+						}}
+					/>
 			</View>
-			<View style={styles.card}>
-				<Image
-					source={{
-						uri: 'https://www.quever.news/u/fotografias/m/2020/10/23/f638x638-2256_60423_5050.jpg',
-					}}
-					style={styles.imageDetalle}
+			
+					<CustomButton
+					title='Guardar'
+					onPress={handlecalificacion}
 				/>
-				<Text style={{ ...styles.texto, fontSize: 22 }}>Juan Pérez </Text>
-				<Image
-					source={{
-						uri: 'https://img.freepik.com/vector-premium/imagen-vectorial-cuatro-estrellas-cinco-buen-nivel_541404-75.jpg?w=2000',
-					}}
-					style={styles.image2}
-				/>
-			</View>
-			<View style={styles.card}>
-				<Image
-					source={{
-						uri: 'https://i.pinimg.com/originals/3b/92/1c/3b921c51dc99d9fb2be192af3ec14f72.jpg',
-					}}
-					style={styles.imageDetalle}
-				/>
-				<Text style={{ ...styles.texto, fontSize: 22 }}>Luis Sánchez </Text>
-				<Image
-					source={{
-						uri: 'https://img.freepik.com/vector-premium/imagen-vectorial-cuatro-estrellas-cinco-buen-nivel_541404-75.jpg?w=2000',
-					}}
-					style={styles.image2}
-				/>
-			</View>
+			<AwesomeAlert
+				show={showAlert}
+				title={showAlertTittle}
+				message={showAlertMessage}
+				showProgress={showAlertProgress}
+				progressColor={colors.primary}
+				progressSize={40}
+				closeOnHardwareBackPress={true}
+				closeOnTouchOutside={false}
+				showConfirmButton={showButton}
+				confirmText='Aceptar'
+				onConfirmPressed={() => {
+					setShowAlert(false);
+					if (responseExitoso) {
+						navigation.navigate('home');
+					}
+				}}
+				confirmButtonStyle={{
+					backgroundColor: colors.blue,
+					width: 100,
+					alignItems: 'center',
+					borderRadius: 30,
+				}}
+				contentContainerStyle={{ borderRadius: 30, marginHorizontal: 50 }}
+			/>
 		</ScrollView>
 	);
 }
@@ -81,7 +168,7 @@ const styles = StyleSheet.create({
 	titulo: {
 		fontSize: 20,
 		fontWeight: 'bold',
-		marginTop: 50,
+		marginTop: 10,
 		alignSelf: 'center',
 	},
 	texto: {
@@ -115,4 +202,14 @@ const styles = StyleSheet.create({
 		borderRadius: 40,
 		marginTop: 20,
 	},
+	inputTextDetalle:{
+		width: 300,
+		height: 100,
+		padding: 10,
+		borderRadius: 10,
+		borderWidth: 1,
+		borderColor: '#ccc',
+		marginTop: 20,
+		marginBottom: 20,
+	}
 });

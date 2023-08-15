@@ -2,12 +2,17 @@ import { View, Text, Image, StyleSheet } from "react-native";
 import React from "react";
 import { Entypo } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 export default function HistorialCard(props) {
 	const navigation = useNavigation();
 	const { servicios } = props;
+	const handleCalificarClick = () => {
+		navigation.navigate('CalificarLimpiador', { servicio: servicios });
+	};
 
   return (
+	<TouchableOpacity onPress={handleCalificarClick}>
     <View style={styles.card}>
       <Image
         source={{
@@ -29,6 +34,7 @@ export default function HistorialCard(props) {
         </View>
   
     </View>
+	</TouchableOpacity>
   );
 }
 

@@ -22,6 +22,7 @@ import EditarServicio from '../screen/EditarServicio';
 import ChatsScreen from '../screen/ChatsScreen';
 import ChatScreen from '../screen/ChatScreen';
 import DetalleServicioLimpiador from '../screen/DetalleServicioLimpiador';
+import ListaCalificacionesScreen from '../screen/ListaCalificacionesScreen';
 
 export default function NavigationAccount() {
 	const Stack = createStackNavigator();
@@ -132,6 +133,11 @@ export default function NavigationAccount() {
 				<Stack.Screen
 				name='ChatScreen'
 				component={ChatScreen}
+				options={{ headerShown: false }}
+			/>
+				<Stack.Screen
+				name='CalificarLimpiador'
+				component={ListaCalificacionesScreen}
 				options={{ headerShown: false }}
 			/>
 		</Stack.Navigator>
