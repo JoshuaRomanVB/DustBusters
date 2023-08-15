@@ -17,9 +17,7 @@ export default function ServiciosListAll(props) {
 		};
 
 		loadToken();
-		const filtered = servicios.filter(
-			(servicio) => servicio.estado === 0 || servicio.estado === 1
-		);
+		const filtered = servicios.filter((servicio) => servicio.estado === 0);
 		setFilteredServicios(filtered);
 	}, [servicios]);
 
