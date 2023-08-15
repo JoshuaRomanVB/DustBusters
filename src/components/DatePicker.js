@@ -11,7 +11,11 @@ function DatePicker({ onSelectDate }) {
     setShowDatePicker(false);
     if (selectedDate) {
       setDate(selectedDate);
-      onSelectDate(selectedDate); // Llama a la función pasando la fecha seleccionada
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0'); // Agrega un cero inicial si el mes es de un solo dígito
+      const day = String(selectedDate.getDate()).padStart(2, '0'); // Agrega un cero inicial si el día es de un solo dígito
+      const formattedDate = `${year}-${month}-${day}`;
+      onSelectDate(formattedDate); // Llama a la función pasando la fecha seleccionada
     }
   };
 

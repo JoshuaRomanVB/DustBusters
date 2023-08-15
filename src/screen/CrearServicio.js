@@ -100,8 +100,8 @@ const CrearServicio = (props) => {
 		};
 		const loadUserId = async () => {
 			const userData = await getUserData();
-			const id = userData.authorities[0].userId;
-			//console.log('userDAta: ', userData.authorities[0].userId);
+			const id = userData.userId;
+			console.log('userDAta: ', userData);
 			setUserId(id);
 		};
 		loadUserId();
@@ -328,14 +328,15 @@ const CrearServicio = (props) => {
 					plantas: plantas,
 					ofertaCliente: ofertaCliente,
 					ofertaAceptada: null,
-					fechaServicio: fecha,
-					horaInicio: horaInicio,
-					horaFin: horaFin,
+					fechaServicio: fecha.toString(),
+					horaInicio: horaInicio.toString(),
+					horaFin: horaFin.toString(),
 					latitud: lat,
 					longitud: long,
 					direccion: direccion,
 					estado: 0,
 				};
+				console.log(servicioData)
 
 				const url = baseUrl + '/api/servicios';
 				const apiResponse = await axios.post(url, servicioData, {
