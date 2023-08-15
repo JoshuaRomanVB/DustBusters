@@ -14,7 +14,7 @@ import CustomHeader from '../components/CustomHeader';
 import AwesomeAlert from 'react-native-awesome-alerts';
 import Constants from 'expo-constants';
 import axios from 'axios';
-import { db, auth } from "../utils/firebaseConfig"; 
+import { db, auth } from '../utils/firebaseConfig';
 import {
 	getUserId,
 	// getUserData,
@@ -23,6 +23,7 @@ import {
 	// clearUserData,
 } from '../utils/sessionStorage';
 import { BackHandler } from 'react-native';
+import { colors } from '../styles/colors';
 import {
 	collection,
 	getDocs,
@@ -30,17 +31,24 @@ import {
 	addDoc,
 	query,
 	where,
-	serverTimestamp 
-  } from "firebase/firestore";
+	serverTimestamp,
+} from 'firebase/firestore';
 
 export default function DetalleServicioLimpiador({ route, navigation }) {
 	const baseUrl = Constants.manifest.extra.baseUrl;
 	const { servicios } = route.params;
+	//console.log(servicios);
 	const id = servicios.serviceId;
 	const idCliente = servicios.cliente.userId;
 	const [token, setToken] = useState('');
 	const [userId, setUserId] = useState('');
-	
+	const [showAlert, setShowAlert] = useState(false);
+	const [showAlertProgress, setShowAlertProgress] = useState(false);
+	const [showButton, setShowButton] = useState(false);
+	const [showAlertTittle, setShowAlertTittle] = useState('');
+	const [showAlertMessage, setShowAlertMessage] = useState('');
+	const [responseExitoso, setResponseExitoso] = useState(false);
+
 	useEffect(() => {
 		const loadToken = async () => {
 			const userToken = await getUserToken();
@@ -54,64 +62,152 @@ export default function DetalleServicioLimpiador({ route, navigation }) {
 
 		loadToken();
 	}, [navigation, route]);
+	const aceptarServicio = async () => {
+		setShowAlert(!showAlert);
+		setShowAlertProgress(!showAlertProgress);
+		setShowButton(false);
+		setShowAlertTittle('Aceptando servicio');
+		setShowAlertMessage('Por favor espera...');
+		try {
+			const servicioData = {
+				cliente: { userId: servicios.cliente.userId },
+				limpiador: { userId: userId },
+				descripcionServicio: servicios.descripcionServicio,
+				urlImagenServicio: servicios.urlImagenServicio,
+				tamanoInmueble: servicios.tamanoInmueble,
+				plantas: servicios.plantas,
+				ofertaCliente: servicios.ofertaCliente,
+				ofertaAceptada: null,
+				fechaServicio: servicios.fechaServicio,
+				horaInicio: servicios.horaInicio,
+				horaFin: servicios.horaFin,
+				latitud: servicios.latitud,
+				longitud: servicios.longitud,
+				direccion: servicios.direccion,
+				estado: 1,
+			};
+			console.log(servicioData);
+			const url = baseUrl + `/api/servicios/${id}`;
+			const apiResponse = await axios.put(url, servicioData, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
 
+			console.log(apiResponse.data);
+			setShowAlertProgress(false);
+			setShowButton(true);
+			setShowAlertTittle('Aceptado con éxito');
+			setShowAlertMessage('Se ha aceptado correctamente el servicio');
+			setResponseExitoso(true);
+		} catch (error) {
+			console.error('Error al aceptar servicio:', error);
+			setShowAlertProgress(false);
+			setShowButton(true);
+			setShowAlertTittle('Error al aceptar');
+			setShowAlertMessage('Inténtelo más tarde');
+		}
+	};
+	const finalizarServicio = async () => {
+		setShowAlert(!showAlert);
+		setShowAlertProgress(!showAlertProgress);
+		setShowButton(false);
+		setShowAlertTittle('Finalizando servicio');
+		setShowAlertMessage('Por favor espera...');
+		try {
+			const servicioData = {
+				cliente: { userId: servicios.cliente.userId },
+				limpiador: { userId: userId },
+				descripcionServicio: servicios.descripcionServicio,
+				urlImagenServicio: servicios.urlImagenServicio,
+				tamanoInmueble: servicios.tamanoInmueble,
+				plantas: servicios.plantas,
+				ofertaCliente: servicios.ofertaCliente,
+				ofertaAceptada: null,
+				fechaServicio: servicios.fechaServicio,
+				horaInicio: servicios.horaInicio,
+				horaFin: servicios.horaFin,
+				latitud: servicios.latitud,
+				longitud: servicios.longitud,
+				direccion: servicios.direccion,
+				estado: 2,
+			};
+			console.log(servicioData);
+			const url = baseUrl + `/api/servicios/${id}`;
+			const apiResponse = await axios.put(url, servicioData, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			console.log(apiResponse.data);
+			setShowAlertProgress(false);
+			setShowButton(true);
+			setShowAlertTittle('Aceptado con éxito');
+			setShowAlertMessage('Se ha aceptado correctamente el servicio');
+			setResponseExitoso(true);
+		} catch (error) {
+			console.error('Error al aceptar servicio:', error);
+			setShowAlertProgress(false);
+			setShowButton(true);
+			setShowAlertTittle('Error al aceptar');
+			setShowAlertMessage('Inténtelo más tarde');
+		}
+	};
 	const handleStartChat = async () => {
 		try {
-
 			const chatSnapshot1 = await getDocs(
 				query(
-				  collection(db, "Chats"),
-				  where("users", "==", [userId, idCliente]),
-				  limit(1)
+					collection(db, 'Chats'),
+					where('users', '==', [userId, idCliente]),
+					limit(1)
 				)
-			  );
-		
-			  // Verificar si ya existe un chat entre los usuarios (caso 2)
-			  const chatSnapshot2 = await getDocs(
+			);
+
+			// Verificar si ya existe un chat entre los usuarios (caso 2)
+			const chatSnapshot2 = await getDocs(
 				query(
-				  collection(db, "Chats"),
-				  where("users", "==", [idCliente, userId]),
-				  limit(1)
+					collection(db, 'Chats'),
+					where('users', '==', [idCliente, userId]),
+					limit(1)
 				)
-			  );
-		
-			  let chatId = "";
-		
-			  if (!chatSnapshot1.empty) {
+			);
+
+			let chatId = '';
+
+			if (!chatSnapshot1.empty) {
 				// Existe un chat entre los usuarios (caso 1)
 				chatId = chatSnapshot1.docs[0].data().id;
-			  } else if (!chatSnapshot2.empty) {
+			} else if (!chatSnapshot2.empty) {
 				// Existe un chat entre los usuarios (caso 2)
 				chatId = chatSnapshot2.docs[0].data().id;
-			  } else {
-		  const chatId = generateChatId(); // Generar un ID único para el chat
-		  const newChat = {
-			id: chatId,
-			serviceId: id,
-			users: [userId, idCliente], // Cambiar por el ID de usuario 2
-		  };
-	
-		  await addDoc(collection(db, "Chats"), newChat);
-		}
-		  // Redirigir a la pantalla de chat
-		  navigation.navigate("ChatScreen", {
-			chatId: chatId,
-			senderId: userId,
-			receiverId: idCliente, // Cambiar por el ID de usuario 2
-		  });
+			} else {
+				const chatId = generateChatId(); // Generar un ID único para el chat
+				const newChat = {
+					id: chatId,
+					serviceId: id,
+					users: [userId, idCliente], // Cambiar por el ID de usuario 2
+				};
+
+				await addDoc(collection(db, 'Chats'), newChat);
+			}
+			// Redirigir a la pantalla de chat
+			navigation.navigate('ChatScreen', {
+				chatId: chatId,
+				senderId: userId,
+				receiverId: idCliente, // Cambiar por el ID de usuario 2
+			});
 		} catch (error) {
-		  console.log("Error al iniciar el chat:", error);
+			console.log('Error al iniciar el chat:', error);
 		}
-	  };
-	  const generateChatId = () => {
+	};
+	const generateChatId = () => {
 		const randomId = Math.random().toString(36).substring(7);
 		const timestamp = Date.now().toString();
 		const chatId = `${randomId}-${timestamp}`;
-	
-		return chatId;
-	  };
 
-	const [showAlert, setShowAlert] = useState(false);
+		return chatId;
+	};
 
 	const handleEditarClick = () => {
 		navigation.navigate('EditarServicio', { servicio: servicios });
@@ -140,8 +236,8 @@ export default function DetalleServicioLimpiador({ route, navigation }) {
 	};
 
 	function irAChat() {
-		navigation.navigate("ChatScreen",{
-			id_servicio: id
+		navigation.navigate('ChatScreen', {
+			id_servicio: id,
 		});
 	}
 
@@ -161,9 +257,7 @@ export default function DetalleServicioLimpiador({ route, navigation }) {
 						<Text style={{ ...styles.texto, fontSize: 20 }}>
 							{servicios.direccion}
 						</Text>
-						<Text style={styles.texto}>
-							{servicios.descripcionServicio}{' '}
-						</Text>
+						<Text style={styles.texto}>{servicios.descripcionServicio} </Text>
 						<View style={{ flex: 1, flexDirection: 'row' }}>
 							<Text style={styles.texto}>{servicios.plantas} planta(s) </Text>
 							<Text style={styles.texto}>
@@ -173,11 +267,33 @@ export default function DetalleServicioLimpiador({ route, navigation }) {
 							</Text>
 						</View>
 					</View>
-
+					<AwesomeAlert
+						show={showAlert}
+						title={showAlertTittle}
+						message={showAlertMessage}
+						showProgress={showAlertProgress}
+						progressColor={colors.primary}
+						progressSize={40}
+						closeOnHardwareBackPress={true}
+						closeOnTouchOutside={false}
+						showConfirmButton={showButton}
+						confirmText='Aceptar'
+						onConfirmPressed={() => {
+							setShowAlert(false);
+							if (responseExitoso) {
+								navigation.navigate('home');
+							}
+						}}
+						confirmButtonStyle={{
+							backgroundColor: colors.blue,
+							width: 100,
+							alignItems: 'center',
+							borderRadius: 30,
+						}}
+						contentContainerStyle={{ borderRadius: 30, marginHorizontal: 50 }}
+					/>
 					<View style={{ flex: 0.5, marginTop: 0, marginRight: -50 }}>
-						<Text style={styles.textoPagado}>
-							${servicios.ofertaCliente}
-						</Text>
+						<Text style={styles.textoPagado}>${servicios.ofertaCliente}</Text>
 					</View>
 				</View>
 			</View>
@@ -225,19 +341,34 @@ export default function DetalleServicioLimpiador({ route, navigation }) {
 
 			<View style={{ flex: 1, flexDirection: 'row' }}>
 				<View style={styles.containerBotones}>
-					<TouchableOpacity
-						style={styles.button}
-						
-					>
-						<Text style={styles.buttonText}>Aceptar</Text>
-					</TouchableOpacity>
+					{servicios.estado == 0 ? (
+						<TouchableOpacity
+							style={styles.button}
+							onPress={() => {
+								aceptarServicio();
+							}}
+						>
+							<Text style={styles.buttonText}>Aceptar</Text>
+						</TouchableOpacity>
+					) : (
+						<TouchableOpacity
+							style={styles.button}
+							onPress={() => {
+								finalizarServicio();
+							}}
+						>
+							<Text style={styles.buttonText}>Finalizar</Text>
+						</TouchableOpacity>
+					)}
 				</View>
 				<View style={styles.containerBotones}>
-					<TouchableOpacity style={styles.button} onPress={() => handleStartChat()}>
+					<TouchableOpacity
+						style={styles.button}
+						onPress={() => handleStartChat()}
+					>
 						<Text style={styles.buttonText}>Chat</Text>
 					</TouchableOpacity>
 				</View>
-			
 			</View>
 		</ScrollView>
 	);
@@ -301,6 +432,7 @@ const styles = StyleSheet.create({
 		borderRadius: 10,
 		marginTop: 20,
 		resizeMode: 'stretch',
+		left: -15,
 	},
 	card: {
 		flex: 1,
@@ -334,7 +466,7 @@ const styles = StyleSheet.create({
 		fontSize: 20,
 		fontWeight: 'bold',
 		marginTop: 10,
-		textAlign:'center'
+		textAlign: 'center',
 	},
 	texto: {
 		fontSize: 15,
