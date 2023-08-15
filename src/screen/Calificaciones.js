@@ -3,32 +3,25 @@ import {
   Text,
   Image,
   StyleSheet,
-  Button,
-  ScrollView,
   FlatList,
-  ImageBackground
+  ImageBackground,
 } from "react-native";
 import React from "react";
-import { Entypo } from "@expo/vector-icons";
 import CustomHeader from "../components/CustomHeader";
 import Constants from "expo-constants";
-import {
-  getUserToken,
-  clearUserId,
-  getUserData,
-  clearUserData,
-} from "../utils/sessionStorage";
+import { getUserToken } from "../utils/sessionStorage";
 import { useFocusEffect } from "@react-navigation/native";
 import StarRating from "../components/StarRating";
 import axios from "axios";
 import { colors } from "../styles/colors";
 
-export default function Calificaciones({route}) {
-	const { userId } = route.params;
+export default function Calificaciones({ route }) {
+  const { userId } = route.params;
   const baseUrl = Constants.manifest.extra.baseUrl;
   const [ratingUser, setRatingUser] = React.useState();
   const [dataUser, setDataUser] = React.useState({});
   const [calificaciones, setCalificaciones] = React.useState({});
+  
   useFocusEffect(
     React.useCallback(() => {
       const loadProfile = async () => {
@@ -40,7 +33,6 @@ export default function Calificaciones({route}) {
               baseUrl +
               "/api/calificaciones/calificacion-general/" +
               userId;
-              console.log(url)
             const response = await axios.get(url, {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -48,22 +40,19 @@ export default function Calificaciones({route}) {
             });
 
             setRatingUser(response.data);
-            console.log(response.data);
 
-
-            console.log( baseUrl + "/api/usuarios/" + userId)
             const userApiUrl = baseUrl + "/api/usuarios/" + userId;
             const userApiResponse = await axios.get(userApiUrl, {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
             });
-            setDataUser(userApiResponse.data)
+            setDataUser(userApiResponse.data);
           } else {
             console.log("El token o los datos del usuario están vacíos.");
           }
 
-          if ( token) {
+          if (token) {
             const url =
               baseUrl + "/api/calificaciones/por-usuario/" + userId;
             const response = await axios.get(url, {
@@ -73,7 +62,6 @@ export default function Calificaciones({route}) {
             });
 
             setCalificaciones(response.data);
-            console.log(response.data);
           } else {
             console.log("El token o los datos del usuario están vacíos.");
           }
@@ -113,91 +101,87 @@ export default function Calificaciones({route}) {
 
   return (
     <View style={styles.contenedor}>
-      		<ImageBackground
-				source={require('../assets/images/baclregistro.png')}
-				style={styles.imageback}
-			>
-      <CustomHeader />
-      <View style={styles.contenedorT}>
-        <Text style={styles.titulo}>Calificaciones</Text>
-        {dataUser && dataUser.fotoPerfil ? (
-          <Image source={{ uri: dataUser.fotoPerfil }} style={styles.image} />
-        ) : (
+      <ImageBackground
+        source={require('../assets/images/baclregistro.png')}
+        style={styles.imageback}
+      >
+        <CustomHeader />
+        <View style={styles.header}>
+          <Text style={styles.titulo}>Calificaciones</Text>
           <Image
-            source={{
-              uri: "https://pbs.twimg.com/profile_images/1374611344712929280/WwOf-3tQ_400x400.jpg",
-            }}
+            source={{ uri: dataUser.fotoPerfil || "https://pbs.twimg.com/profile_images/1374611344712929280/WwOf-3tQ_400x400.jpg" }}
             style={styles.image}
           />
-        )}
-
-        <Text style={{ ...styles.texto, fontSize: 22 }}>
-          {dataUser.nombreCompleto}
-        </Text>
-        <StarRating rating={ratingUser} />
-      </View>
-
-      {ratingUser ? (
-        <FlatList
-          data={calificaciones}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.calificacionId} // Assuming you have unique IDs for each item
-        />
-      ) : (
-        <View style={styles.contenedorT}>
-          <Text style={styles.textoCalificar}>Nadie te a calificado</Text>
-          <Image
-            source={require("../../src/assets/images/triste.jpg")}
-            style={styles.image}
-          />
+          <Text style={{ ...styles.titulo, fontSize: 22 }}>
+            {dataUser.nombreCompleto}
+          </Text>
+          <StarRating rating={ratingUser} />
         </View>
-      )}
+
+        {ratingUser ? (
+          <FlatList
+            data={calificaciones}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.calificacionId}
+            style={styles.flatList}
+          />
+        ) : (
+          <View style={styles.noCalificaciones}>
+            <Text style={styles.textoCalificar}>Nadie te ha calificado</Text>
+            <Image
+              source={require("../../src/assets/images/triste.jpg")}
+              style={styles.image}
+            />
+          </View>
+        )}
       </ImageBackground>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   contenedor: {
     flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   contenedorT: {
     flex: 1,
     alignItems: "center",
   },
-  cardCalificacion: {
+  header: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
-    width: 335,
-    marginLeft: 20,
+    marginTop: 20,
+  },
+  cardCalificacion: {
+    width: '100%',
     marginTop: 20,
     backgroundColor: "#fff",
     borderRadius: 20,
     borderColor: "#000",
-    borderWidth: 2, // Especifica el ancho del borde
-
-    overflow: "hidden", // Recortar el contenido si se desborda
+    borderWidth: 2,
+    overflow: "hidden",
   },
-
   titulo: {
     fontSize: 30,
     fontWeight: "bold",
     marginTop: 20,
-    color: colors.white
+    color: colors.white,
   },
   texto: {
     fontSize: 15,
     fontWeight: "bold",
-    color: colors.white,
+    color: colors.black,
     marginLeft: 10,
-    marginTop: 10, // Reducir el margen superior para dar espacio al texto
+    marginTop: 10,
   },
   textoCalificar: {
     fontSize: 18,
     fontWeight: "bold",
     marginLeft: 15,
     color: "#F5AE03",
-    marginTop: 30, // Reducir el margen superior para dar espacio al texto
+    marginTop: 30,
   },
   textoPagado: {
     fontSize: 20,
@@ -212,33 +196,24 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 20,
   },
-  image2: {
-    width: 250,
-    height: 50,
-    borderRadius: 40,
-    marginTop: 20,
-  },
   image3: {
     width: 50,
     height: 50,
     borderRadius: 40,
     marginTop: 0,
   },
-  image4: {
-    width: 40,
-    height: 40,
-    borderRadius: 40,
-    marginTop: 20,
-    marginLeft: 5,
-  },
-  image5: {
-    width: 40,
-    height: 40,
-    borderRadius: 40,
-    marginLeft: 100,
-  },
   imageback: {
     flex: 1,
     resizeMode: "cover",
+    width: "100%",
+    height: "100%",
+  },
+  flatList: {
+    flex: 2, // Ocupa el 50% de la pantalla
+    width: "100%", // Ocupa todo el ancho
+  },
+  noCalificaciones: {
+    flex: 2,
+    alignItems: "center",
   },
 });
