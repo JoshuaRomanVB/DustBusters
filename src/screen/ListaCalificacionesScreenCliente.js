@@ -6,7 +6,7 @@ import {
 	Button,
 	ScrollView,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import CustomHeader from '../components/CustomHeader';
 import StarInput from '../components/StarInput';
 import { getUserToken } from '../utils/sessionStorage';
@@ -17,17 +17,20 @@ import { TextInput } from 'react-native';
 import CustomButton from '../components/CustomButton';
 import axios from 'axios';
 
-export default function ListaCalificacionesScreenCliente({route, navigation}) {
+export default function ListaCalificacionesScreenCliente({
+	route,
+	navigation,
+}) {
 	const baseUrl = Constants.manifest.extra.baseUrl;
-	const {servicio}=route.params;
+	const { servicio } = route.params;
 	const [calificacion, setCalificacion] = useState('');
 	const [comentario, setComentario] = useState('');
 
 	const handleRatingChange = (rating) => {
 		console.log('Calificación seleccionada:', rating);
 		setCalificacion(rating);
-	  };
-	  const [token, setToken] = useState('');
+	};
+	const [token, setToken] = useState('');
 
 	useEffect(() => {
 		const loadToken = async () => {
@@ -35,17 +38,17 @@ export default function ListaCalificacionesScreenCliente({route, navigation}) {
 			setToken(userToken);
 		};
 		loadToken();
-	},[]);
-	
-//Alert dialog
-const [showAlert, setShowAlert] = useState(false);
-const [showAlertProgress, setShowAlertProgress] = useState(false);
-const [showButton, setShowButton] = useState(false);
-const [showAlertTittle, setShowAlertTittle] = useState('');
-const [showAlertMessage, setShowAlertMessage] = useState('');
-const [responseExitoso, setResponseExitoso] = useState(false);
+	}, []);
 
-const handlecalificacion = async (imageURL) => {
+	//Alert dialog
+	const [showAlert, setShowAlert] = useState(false);
+	const [showAlertProgress, setShowAlertProgress] = useState(false);
+	const [showButton, setShowButton] = useState(false);
+	const [showAlertTittle, setShowAlertTittle] = useState('');
+	const [showAlertMessage, setShowAlertMessage] = useState('');
+	const [responseExitoso, setResponseExitoso] = useState(false);
+
+	const handlecalificacion = async (imageURL) => {
 		setShowAlert(!showAlert);
 		setShowAlertProgress(!showAlertProgress);
 		setShowButton(false);
@@ -55,19 +58,17 @@ const handlecalificacion = async (imageURL) => {
 		try {
 			// Segunda petición: Guardar datos del servicio en tu API
 			const servicioData = {
-
-					calificacion: calificacion,
-					nombreCalificador: servicio.limpiador.nombreCompleto,
-					idUsuarioCalificado: servicio.cliente.userId, 
-					urlImagenCalificador: servicio.limpiador.fotoPerfil,
-					comentario: comentario
-			
+				calificacion: calificacion,
+				nombreCalificador: servicio.limpiador.nombreCompleto,
+				idUsuarioCalificado: servicio.cliente.userId,
+				urlImagenCalificador: servicio.limpiador.fotoPerfil,
+				comentario: comentario,
 			};
 
 			const url = baseUrl + `/api/calificaciones`;
-			console.log(servicioData)
-			console.log(url)
-			console.log(token)
+			console.log(servicioData);
+			console.log(url);
+			console.log(token);
 			const apiResponse = await axios.post(url, servicioData, {
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -89,62 +90,126 @@ const handlecalificacion = async (imageURL) => {
 			setShowAlertTittle('Error en el guardado');
 			setShowAlertMessage('Inténtelo más tarde');
 		}
-	}
-
+	};
+	const finalizarServicio = async () => {
+		setShowAlert(!showAlert);
+		setShowAlertProgress(!showAlertProgress);
+		setShowButton(false);
+		setShowAlertTittle('Finalizando servicio');
+		setShowAlertMessage('Por favor espera...');
+		try {
+			const servicioData = {
+				cliente: { userId: servicio.cliente.userId },
+				limpiador: { userId: servicio.limpiador.userId },
+				descripcionServicio: servicio.descripcionServicio,
+				urlImagenServicio: servicio.urlImagenServicio,
+				tamanoInmueble: servicio.tamanoInmueble,
+				plantas: servicio.plantas,
+				ofertaCliente: servicio.ofertaCliente,
+				ofertaAceptada: null,
+				fechaServicio: servicio.fechaServicio,
+				horaInicio: servicio.horaInicio,
+				horaFin: servicio.horaFin,
+				latitud: servicio.latitud,
+				longitud: servicio.longitud,
+				direccion: servicio.direccion,
+				estado: 2,
+			};
+			console.log(servicioData);
+			const url = baseUrl + `/api/servicios/${servicio.serviceId}`;
+			const apiResponse = await axios.put(url, servicioData, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+			navigation.navigate('historialLimpiador');
+			console.log(apiResponse.data);
+			setShowAlertProgress(false);
+			setShowButton(true);
+			setShowAlertTittle('Finalizado con éxito');
+			setShowAlertMessage('Se ha Finalizado correctamente el servicio');
+		} catch (error) {
+			console.error('Error al Finalizar servicio:', error);
+			setShowAlertProgress(false);
+			setShowButton(true);
+			setShowAlertTittle('Error al Finalizar');
+			setShowAlertMessage('Inténtelo más tarde');
+		}
+	};
 
 	return (
 		<ScrollView style={{ flex: 1 }}>
-			<CustomHeader/>
-			<Text style={styles.titulo}>{servicio.descripcionServicio}</Text>
-			<Text style={{...styles.titulo, textAlign: 'center', marginTop: 20}}>Tu opinión es muy importante, califica a el cliente</Text>
-			<View style={styles.card}>
-				<Image
-					source={{
-						uri: servicio.cliente.fotoPerfil,
-					}}
-					style={styles.imageDetalle}
-				/>
-				<Text style={{ ...styles.texto, fontSize: 22 }}>{servicio.cliente.nombreCompleto}</Text>
-				<StarInput onChangeRating={handleRatingChange}/>
-				<TextInput 
-						placeholder='Comentario'
-						style={[styles.inputTextDetalle]}
-						autoCapitalize='none'
-						onChangeText={(text) => {
-							setComentario(text);
+			<CustomHeader />
+			{servicio.estado == 2 ? (
+				<View style={{ alignItems: 'center', marginTop: 90 }}>
+					<Text style={styles.titulo}>
+						Ya se finalizó el servicio, ¡GRACIAS!
+					</Text>
+					<Image
+						source={{
+							uri: 'https://cdn-icons-png.flaticon.com/512/4698/4698094.png',
 						}}
+						style={{ ...styles.imageDetalle, marginTop: 50 }}
 					/>
-			</View>
-			
-					<CustomButton
-					title='Guardar'
-					onPress={handlecalificacion}
-				/>
-			<AwesomeAlert
-				show={showAlert}
-				title={showAlertTittle}
-				message={showAlertMessage}
-				showProgress={showAlertProgress}
-				progressColor={colors.primary}
-				progressSize={40}
-				closeOnHardwareBackPress={true}
-				closeOnTouchOutside={false}
-				showConfirmButton={showButton}
-				confirmText='Aceptar'
-				onConfirmPressed={() => {
-					setShowAlert(false);
-					if (responseExitoso) {
-						navigation.navigate('home');
-					}
-				}}
-				confirmButtonStyle={{
-					backgroundColor: colors.blue,
-					width: 100,
-					alignItems: 'center',
-					borderRadius: 30,
-				}}
-				contentContainerStyle={{ borderRadius: 30, marginHorizontal: 50 }}
-			/>
+				</View>
+			) : (
+				<View style={styles.containerBotones}>
+					<Text style={styles.titulo}>{servicio.descripcionServicio}</Text>
+
+					<Text
+						style={{ ...styles.titulo, textAlign: 'center', marginTop: 20 }}
+					>
+						Tu opinión es muy importante, califica a el cliente
+					</Text>
+					<View style={styles.card}>
+						<Image
+							source={{
+								uri: servicio.cliente.fotoPerfil,
+							}}
+							style={styles.imageDetalle}
+						/>
+						<Text style={{ ...styles.texto, fontSize: 22 }}>
+							{servicio.cliente.nombreCompleto}
+						</Text>
+						<StarInput onChangeRating={handleRatingChange} />
+						<TextInput
+							placeholder='Comentario'
+							style={[styles.inputTextDetalle]}
+							autoCapitalize='none'
+							onChangeText={(text) => {
+								setComentario(text);
+							}}
+						/>
+					</View>
+
+					<CustomButton title='Guardar' onPress={handlecalificacion} />
+					<AwesomeAlert
+						show={showAlert}
+						title={showAlertTittle}
+						message={showAlertMessage}
+						showProgress={showAlertProgress}
+						progressColor={colors.primary}
+						progressSize={40}
+						closeOnHardwareBackPress={true}
+						closeOnTouchOutside={false}
+						showConfirmButton={showButton}
+						confirmText='Finalizar '
+						onConfirmPressed={() => {
+							setShowAlert(false);
+							if (responseExitoso) {
+								finalizarServicio();
+							}
+						}}
+						confirmButtonStyle={{
+							backgroundColor: colors.blue,
+							width: 100,
+							alignItems: 'center',
+							borderRadius: 30,
+						}}
+						contentContainerStyle={{ borderRadius: 30, marginHorizontal: 50 }}
+					/>
+				</View>
+			)}
 		</ScrollView>
 	);
 }
@@ -202,7 +267,7 @@ const styles = StyleSheet.create({
 		borderRadius: 40,
 		marginTop: 20,
 	},
-	inputTextDetalle:{
+	inputTextDetalle: {
 		width: 300,
 		height: 100,
 		padding: 10,
@@ -211,5 +276,5 @@ const styles = StyleSheet.create({
 		borderColor: '#ccc',
 		marginTop: 20,
 		marginBottom: 20,
-	}
+	},
 });

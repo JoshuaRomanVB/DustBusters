@@ -108,52 +108,7 @@ export default function DetalleServicioLimpiador({ route, navigation }) {
 			setShowAlertMessage('Inténtelo más tarde');
 		}
 	};
-	const finalizarServicio = async () => {
-		setShowAlert(!showAlert);
-		setShowAlertProgress(!showAlertProgress);
-		setShowButton(false);
-		setShowAlertTittle('Finalizando servicio');
-		setShowAlertMessage('Por favor espera...');
-		try {
-			const servicioData = {
-				cliente: { userId: servicios.cliente.userId },
-				limpiador: { userId: userId },
-				descripcionServicio: servicios.descripcionServicio,
-				urlImagenServicio: servicios.urlImagenServicio,
-				tamanoInmueble: servicios.tamanoInmueble,
-				plantas: servicios.plantas,
-				ofertaCliente: servicios.ofertaCliente,
-				ofertaAceptada: null,
-				fechaServicio: servicios.fechaServicio,
-				horaInicio: servicios.horaInicio,
-				horaFin: servicios.horaFin,
-				latitud: servicios.latitud,
-				longitud: servicios.longitud,
-				direccion: servicios.direccion,
-				estado: 2,
-			};
-			console.log(servicioData);
-			const url = baseUrl + `/api/servicios/${id}`;
-			const apiResponse = await axios.put(url, servicioData, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
 
-			console.log(apiResponse.data);
-			setShowAlertProgress(false);
-			setShowButton(true);
-			setShowAlertTittle('Aceptado con éxito');
-			setShowAlertMessage('Se ha aceptado correctamente el servicio');
-			setResponseExitoso(true);
-		} catch (error) {
-			console.error('Error al aceptar servicio:', error);
-			setShowAlertProgress(false);
-			setShowButton(true);
-			setShowAlertTittle('Error al aceptar');
-			setShowAlertMessage('Inténtelo más tarde');
-		}
-	};
 	const handleStartChat = async () => {
 		try {
 			const chatSnapshot1 = await getDocs(
@@ -354,7 +309,7 @@ export default function DetalleServicioLimpiador({ route, navigation }) {
 						<TouchableOpacity
 							style={styles.button}
 							onPress={() => {
-								finalizarServicio();
+								console.log('finalizar');
 							}}
 						>
 							<Text style={styles.buttonText}>Finalizar</Text>
