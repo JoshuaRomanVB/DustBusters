@@ -23,9 +23,12 @@ import {
   getUserData,
   clearUserData,
 } from "../utils/sessionStorage";
+import Constants from 'expo-constants';
 
 const CreateCreditCardsScreen = ({ navigation }) => {
+  const baseUrl = Constants.manifest.extra.baseUrl;
   const [dataUser, setDataUser] = useState([]);
+  const [token, setToken] = useState('');
   //Alert dialog
   const [showAlert, setShowAlert] = useState(false);
   const [showAlertProgress, setShowAlertProgress] = useState(false);
@@ -113,6 +116,8 @@ const CreateCreditCardsScreen = ({ navigation }) => {
     try {
       const userData = await getUserData();
       setDataUser(userData)
+      const userToken = await getUserToken();
+			setToken(userToken);
 
     } catch (error) {
       console.log("Error al cargar el perfil:", error);
@@ -150,9 +155,8 @@ const CreateCreditCardsScreen = ({ navigation }) => {
       setShowAlertTittle("Guardando tarjeta");
       setShowAlertMessage("Por favor espera...");
 
-      const merchantId = "mqmsrg8kqp8emsh76dgj";
 
-      const url = `https://sandbox-api.openpay.mx/v1/${merchantId}/customers/${dataUser.userIdOpenpay}/cards`;
+	const url = baseUrl + '/api/openpay/cards/' + dataUser.userIdOpenpay;
 
       console.log(
         nombre +
@@ -179,7 +183,7 @@ const CreateCreditCardsScreen = ({ navigation }) => {
 
       const headers = {
         "Content-Type": "application/json",
-        Authorization: `Basic c2tfOTE0ZGUzODljM2E3NDA1ZDkxNGViM2ExMGFiNzE3M2U6`,
+        Authorization: `Bearer ${token}`,
       };
 
       try {

@@ -20,8 +20,11 @@ import {
   getUserData,
   clearUserData,
 } from "../utils/sessionStorage";
+import Constants from 'expo-constants';
 
 const CreditCardsScreen = ({ navigation }) => {
+  const baseUrl = Constants.manifest.extra.baseUrl;
+  const [token, setToken] = useState('');
   const [tarjetas, setTarjetas] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
@@ -35,6 +38,8 @@ const CreditCardsScreen = ({ navigation }) => {
     try {
       const userData = await getUserData();
       console.log(userData)
+      const userToken = await getUserToken();
+			setToken(userToken);
       await handlerObtenerTarjeta(userData);
     } catch (error) {
       console.log("Error al cargar el perfil:", error);
@@ -55,12 +60,12 @@ const CreditCardsScreen = ({ navigation }) => {
   );
 
   const handlerObtenerTarjeta = async (userData) => {
-    const merchantId = "mqmsrg8kqp8emsh76dgj";
-    const url = `https://sandbox-api.openpay.mx/v1/${merchantId}/customers/${userData.userIdOpenpay}/cards`;
+
+  	const url = baseUrl + '/api/openpay/cards/' + userData.userIdOpenpay;
     console.log(url)
     const headers = {
       "Content-Type": "application/json",
-      Authorization: `Basic c2tfOTE0ZGUzODljM2E3NDA1ZDkxNGViM2ExMGFiNzE3M2U6`,
+      Authorization: `Bearer ${token}`,
     };
     try {
       const response = await axios.get(url, { headers });
@@ -74,11 +79,11 @@ const CreditCardsScreen = ({ navigation }) => {
   const handleEliminarTarjeta = async () => {
     if (selectedCard) {
       setShowAlert(false);
-      const merchantId = "mqmsrg8kqp8emsh76dgj";
-      const url = `https://sandbox-api.openpay.mx/v1/${merchantId}/customers/${selectedCard.customer_id}/cards/${selectedCard.id}`;
+      const url = baseUrl + '/api/openpay/cards/' + selectedCard.customer_id + "/" +selectedCard.id ;
+
       const headers = {
         "Content-Type": "application/json",
-        Authorization: `Basic c2tfOTE0ZGUzODljM2E3NDA1ZDkxNGViM2ExMGFiNzE3M2U6`,
+        Authorization: `Bearer ${token}`,
       };
       try {
         await axios.delete(url, { headers });

@@ -190,24 +190,10 @@ const CrearCuentaFormLimpiadorScreen = ({ navigation, route }) => {
 
 			try {
 				// Primera petición: Crear usuario en Openpay
-				const openpayResponse = await axios.post(
-					'https://sandbox-api.openpay.mx/v1/mqmsrg8kqp8emsh76dgj/customers',
-					{
-						name: name,
-						email: email,
-						phone_number: telefono,
-						requires_account: false,
-					},
-					{
-						headers: {
-							Authorization:
-								'Basic c2tfOTE0ZGUzODljM2E3NDA1ZDkxNGViM2ExMGFiNzE3M2U6',
-						},
-					}
-				);
+			
 
 				// Aquí puedes hacer algo con la respuesta de Openpay, como guardar el ID del cliente en el estado o en el almacenamiento local.
-				const openpayCustomerId = openpayResponse.data.id;
+			
 
 				// Segunda petición: Guardar datos del usuario en tu API
 				const userData = {
@@ -215,10 +201,10 @@ const CrearCuentaFormLimpiadorScreen = ({ navigation, route }) => {
 					numeroTelefono: telefono,
 					correo: email,
 					password: password,
-					enabled: true,
+					enabled: false,
 					telefono: telefono,
 					curp: 'ESSF',
-					userIdOpenpay: openpayCustomerId,
+					userIdOpenpay: "",
 					tipoUsuario: 2,
 					fotoPerfil: imageURL,
 					fechaRegistro: '2023-07-27T12:34:56',

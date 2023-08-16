@@ -343,7 +343,7 @@ const CrearServicio = (props) => {
 					headers: {
 						Authorization: `Bearer ${token}`,
 					},
-				});
+				}); 
 
 				// Aquí puedes manejar la respuesta de tu API según tus necesidades
 				console.log(apiResponse.data); // O cualquier otra acción que desees realizar
