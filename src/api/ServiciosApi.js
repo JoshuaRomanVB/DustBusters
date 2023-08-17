@@ -30,7 +30,7 @@ export default function ServiciosApi({ navigation }) {
 
 							console.log(servicios);
 						} catch (error) {
-							console.error(error);
+						
 						}
 					} else {
 						console.log('El token o los datos del usuario están vacíos.');

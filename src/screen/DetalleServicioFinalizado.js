@@ -34,10 +34,10 @@ import {
 	serverTimestamp,
 } from 'firebase/firestore';
 
-export default function DetalleServicioLimpiador({ route, navigation }) {
+export default function DetalleServicioFinalizado({ route, navigation }) {
 	const baseUrl = Constants.manifest.extra.baseUrl;
 	const { servicios } = route.params;
-	//console.log(servicios);
+	console.log(servicios);
 	const id = servicios.serviceId;
 	const idCliente = servicios.cliente.userId;
 	const [token, setToken] = useState('');
@@ -130,6 +130,7 @@ export default function DetalleServicioLimpiador({ route, navigation }) {
 				)
 			  );
 			  
+
 			let chatId = '';
 
 			if (!chatSnapshot1.empty) {
@@ -265,27 +266,7 @@ export default function DetalleServicioLimpiador({ route, navigation }) {
 			</View>
 
 			<View style={{ flex: 1, flexDirection: 'row' }}>
-				<View style={styles.containerBotones}>
-					{servicios.estado == 0 ? (
-						<TouchableOpacity
-							style={styles.button}
-							onPress={() => {
-								aceptarServicio();
-							}}
-						>
-							<Text style={styles.buttonText}>Aceptar</Text>
-						</TouchableOpacity>
-					) : (
-						<TouchableOpacity
-							style={styles.button}
-							onPress={() => {
-								console.log('finalizar');
-							}}
-						>
-							<Text style={styles.buttonText}>Finalizar</Text>
-						</TouchableOpacity>
-					)}
-				</View>
+	
 				<View style={styles.containerBotones}>
 					<TouchableOpacity
 						style={styles.button}

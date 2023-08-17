@@ -39,9 +39,9 @@ export default function Historial() {
 
 					console.log(servicios);
 				} catch (error) {
-					console.error(error);
+			
 					if (error.response && error.response.status === 404) {
-						console.error('Recurso no encontrado:', error);
+					
 						// Aquí puedes mostrar un mensaje de error al usuario o tomar otra acción
 						setServicios('No posee un historial aún.');
 					  } else {

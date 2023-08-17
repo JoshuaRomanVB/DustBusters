@@ -24,6 +24,7 @@ import ChatScreen from '../screen/ChatScreen';
 import DetalleServicioLimpiador from '../screen/DetalleServicioLimpiador';
 import ListaCalificacionesScreen from '../screen/ListaCalificacionesScreen';
 import ListaCalificacionesScreenCliente from '../screen/ListaCalificacionesScreenCliente';
+import DetalleServicioFinalizado from '../screen/DetalleServicioFinalizado';
 
 export default function NavigationAccount() {
 	const Stack = createStackNavigator();
@@ -144,6 +145,11 @@ export default function NavigationAccount() {
 				<Stack.Screen
 				name='CalificarCliente'
 				component={ListaCalificacionesScreenCliente}
+				options={{ headerShown: false }}
+			/>
+						<Stack.Screen
+				name='DetallesFinalizado'
+				component={DetalleServicioFinalizado}
 				options={{ headerShown: false }}
 			/>
 		</Stack.Navigator>

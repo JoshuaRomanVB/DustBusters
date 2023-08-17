@@ -38,44 +38,52 @@ export default function ChatScreen({ route, navigation }) {
   }
 
   useEffect(() => {
-    const fetchDataUser = async () => {
-      const userToken = await getUserToken();
-      setToken(userToken);
-      const userApiUrl = baseUrl + "/api/usuarios/" + receiverId;
-      const userApiResponse = await axios.get(userApiUrl, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const otherUserData = userApiResponse.data;
-      setOtherUser(otherUserData);
-
-
-      const calificacionUrl = baseUrl + "/api/calificaciones/calificacion-general//" + receiverId;
-      const calificacionResponse = await axios.get(calificacionUrl, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const calificacion = calificacionResponse.data;
-      setCalificacion(calificacion);
+    const fetchData = async () => {
+      try {
+        const userToken = await getUserToken();
+        setToken(userToken);
+  
+        const userApiUrl = `${baseUrl}/api/usuarios/${receiverId}`;
+        const userApiResponse = await axios.get(userApiUrl, {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        });
+        const otherUserData = userApiResponse.data;
+        setOtherUser(otherUserData);
+  
+        const calificacionUrl = `${baseUrl}/api/calificaciones/calificacion-general/${receiverId}`;
+        const calificacionResponse = await axios.get(calificacionUrl, {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        });
+        const calificacion = calificacionResponse.data;
+        setCalificacion(calificacion);
+      } catch (error) {
+        console.log('Error al obtener datos del usuario o calificación:', error);
+      }
     };
-    fetchDataUser();
-
+  
+    fetchData();
+  
     // Consultar los mensajes del chat
     const q = query(
-      collection(db, "Mensajes"),
-      where("chatId", "==", chatId),
-      orderBy("timestamp", "desc")
+      collection(db, 'Mensajes'),
+      where('chatId', '==', chatId),
+      orderBy('timestamp', 'desc')
     );
-
+  
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const messageArray = snapshot.docs.map((doc) => doc.data());
       setMessages(messageArray);
     });
-
-    return () => unsubscribe();
-  }, [chatId, token, calificacion]);
+  
+    return () => {
+      unsubscribe();
+    };
+  }, [chatId, receiverId]);
+  
 
   const handleSend = async () => {
     if (messageText.trim() === "") return;

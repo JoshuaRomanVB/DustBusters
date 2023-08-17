@@ -8,7 +8,12 @@ export default function HistorialCardLimpiador(props) {
 	const navigation = useNavigation();
 	const { servicios } = props;
 	const handleCalificarClick = () => {
-		navigation.navigate('CalificarCliente', { servicio: servicios });
+		if(servicios.estado == 1){
+			navigation.navigate('CalificarCliente', { servicio: servicios });
+		} else{
+			navigation.navigate('DetallesFinalizado', { servicios: servicios });
+		}
+	
 	};
 
   return (

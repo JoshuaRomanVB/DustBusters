@@ -4,14 +4,14 @@ import 'dotenv/config';
 export default
 {
   "expo": {
-    "name": "login",
+    "name": "DustBuster",
     "slug": "login",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/images/logoapp.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/images/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

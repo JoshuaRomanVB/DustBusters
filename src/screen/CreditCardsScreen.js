@@ -37,32 +37,29 @@ const CreditCardsScreen = ({ navigation }) => {
   const loadProfile = useCallback(async () => {
     try {
       const userData = await getUserData();
-      console.log(userData)
       const userToken = await getUserToken();
-			setToken(userToken);
-      await handlerObtenerTarjeta(userData);
+      setToken(userToken);
+      await handlerObtenerTarjeta(userData); // Mueve la llamada aquí
     } catch (error) {
       console.log("Error al cargar el perfil:", error);
     }
-  }, []);
+  }, [token]);
 
-  useEffect(() => {
-    loadProfile();
-    return () => {
-      // aquí puedes cancelar cualquier operación pendiente si es necesario
-    };
-  }, []);
 
   useFocusEffect(
     useCallback(() => {
       loadProfile();
-    }, [])
+    }, [token])
   );
 
   const handlerObtenerTarjeta = async (userData) => {
-
+    if (!token) {
+      console.log("Token está vacío. No se puede hacer la solicitud.");
+      return;
+    }
   	const url = baseUrl + '/api/openpay/cards/' + userData.userIdOpenpay;
     console.log(url)
+    console.log(token)
     const headers = {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
